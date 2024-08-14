@@ -1,0 +1,36 @@
+version: "3.9"
+services:
+  mood_mate_bot:
+    container_name: mood_mate_bot
+    # restart: always
+    build: .
+    # depends_on:
+    #   - kvira_redis
+    networks:
+      - bot_network
+    # .env file
+    env_file:
+      - .env
+    # Create volume for database
+    volumes:
+      - ./moodmate_db:/moodmate_db
+
+  mood_mate_redis:
+    container_name: mood_mate_redis
+    image: redis
+    restart: always
+    # Persistent storage
+    volumes:
+      - ./redis_data:/data
+      - ./redis_config/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server --save 60 1 --loglevel warning
+    ports:
+      - "16379:16379"
+    environment:
+    - REDIS_MAXMEMORY=2048mb # Limit Redis memory usage to 1024mb
+    networks:
+      - bot_network
+
+networks:
+  bot_network:
+    driver: bridge
