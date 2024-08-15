@@ -3,7 +3,7 @@ from aiogram.types.inline_keyboard_button import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram import types
 from mood_mate_src.database_tools.users import Language, User
-
+from abc import ABC
 
 
 BUTTONS_TEXT_LANG = {
@@ -102,6 +102,7 @@ def get_settings_keyboard(user: User | None = None):
     keyboard_buttons = [
         [
             KeyboardButton(text=BUTTONS_TEXT_LANG[language]["change_language"]),
+            KeyboardButton(text=BUTTONS_TEXT_LANG[language]["toggle_reminder"]),
             KeyboardButton(text=BUTTONS_TEXT_LANG[language]["go_back"]),
         ]
     ]

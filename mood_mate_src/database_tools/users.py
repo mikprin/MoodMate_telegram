@@ -1,5 +1,6 @@
 import json
 import os
+from dataclasses import dataclass
 from pydantic import BaseModel
 from datetime import datetime
 from enum import Enum
