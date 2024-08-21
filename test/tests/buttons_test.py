@@ -8,3 +8,4 @@ def test_get_all_buttons_text():
     button = "track_mood"
     labels = get_all_buttons_text(button)
     assert set(labels) == {"Записать настроение", "Track mood"}
+    

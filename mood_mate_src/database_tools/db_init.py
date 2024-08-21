@@ -24,6 +24,7 @@ def table_exists(db_path, table_name):
     return result is not None
 
 def init_db():
+    logger.debug(f"Initializing SQLite database at {DB_PATH}")
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     

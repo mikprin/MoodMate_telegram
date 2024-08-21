@@ -17,12 +17,26 @@ class Language(Enum):
     ENG = "en"
     RU = "ru"
 
-class Doping():
-    """I use custom class because I want to store name of the doping in several Languages
-    """
-    
-
-default_dopings = []
+default_dopings_list = {
+    Language.ENG.value: [
+                        "Coffee/caffeine: ☕",
+                        "Smoking: 🚬",
+                        "Alcohol: 🍺 or 🍷",
+                        "Weed: 🌿",
+                        "Mushrooms: 🍄",
+                        # "LSD: 🌈",
+                        "Pills?: 💊",
+                        ],
+    Language.RU.value: [
+                        "Кофе/кофеин: ☕",
+                        "Курение: 🚬",
+                        "Алкоголь: 🍺 или 🍷",
+                        "Трава: 🌿",
+                        "Грибы: 🍄",
+                        # "ЛСД: 🌈",
+                        "Таблетки?: 💊",
+                        ]
+}
 
 
 class Gender(Enum):
@@ -68,6 +82,7 @@ def create_user_from_telegram_message(message: Message) -> User:
         settings=UserSettings(
             name = message.from_user.full_name,
             username=message.from_user.username,
+            dopings_list=default_dopings_list[language.value],
             created_at = int(datetime.now().timestamp()),
             language=language.value,
         )
@@ -163,3 +178,14 @@ def get_all_users_from_db() -> list[User]:
         user = User(**user_data)
         users.append(user)
     return users
+
+
+async def process_user_db(message: Message):
+    """Process the user database when new msg arrives
+    Effectively creates or retrieves the user from the database
+    """
+    user = get_user_from_db(message.from_user.id)
+    if user is None:
+        user = create_user_from_telegram_message(message)
+        await add_user_to_db(user)
+    return user
