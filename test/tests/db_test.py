@@ -51,7 +51,7 @@ class TestAddMoodRecordToDb(unittest.TestCase):
             sleep = 7,
             horny = 3,
             exercise = 1,
-            doping = ['Caffeine'],
+            dopings = ['Caffeine'],
             energy = 8,
             anxiety = 2,
             period = False,

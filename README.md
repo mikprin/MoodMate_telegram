@@ -1,5 +1,12 @@
 # MoodMate_telegram
 
+## Short description
+Telegram bot with AI integration to track mood and emotions.
+
+## Motivation
+
+Our mental health is as important as our physical health. It is important to keep track of our mood and emotions to understand how we are feeling and to identify patterns that may be affecting our mental health. This project aims to help people track their mood and emotions by providing them with a simple and easy-to-use tool that they can use to record their mood and emotions on a daily basis. The tool will provide users with a summary of their mood over time and suggest ways to improve their mood based on their responses.
+
 ## Idea behind the project
 
 The idea behind the project is to create a telegram bot that can help people to track their mood and emotions. The bot will ask the user how they are feeling and the user can respond with an emoji that represents their mood. The bot will then store this information and provide the user with a summary of their mood over time. The bot will also provide the user with suggestions on how to improve their mood based on their responses.
@@ -14,6 +21,7 @@ Things to track:
 - Period cycle (for women)
 - List could be extended
 
+
 User can ask for summary in the following ways:
 - Summary as plot for the last N days. Some items can be ticked off.
 
@@ -25,7 +33,7 @@ It would be nice to have an advice or cheers up message based on the mood of the
 
 If you feel like it you can send a message to the bot and it will send it to random user if they are feeling down.
 
-
+Track anger?
 
 ## Stack
 
@@ -51,7 +59,7 @@ I use SQLite3 for the database. The database has two tables right now:
     - `sleep` (int): hours of sleep
     - `horny` (int): horny level
     - `exercise` (int): hours of exercise
-    - `doping` (str): list of doping
+    - `dopings` (str): list of doping
     - `energy` (int): energy level
     - `anxiety` (int): anxiety level
     - `period` (str): period  (optional)

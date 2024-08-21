@@ -20,7 +20,12 @@ fi
 
 
 # Install requirements
-pip3 install -r "$BASEDIR/requirements.txt"
 pip3 install pytest pytest-asyncio
+pip3 install -r "$BASEDIR/requirements.txt"
+export SQLITE_DB_PATH=./test_db.db
+
+source "$BASEDIR/test.env"
+echo "Running tests"
+echo "DATABASE_URL: $SQLITE_DB_PATH"
 
 python3 -m pytest -v "$BASEDIR/test/tests"

@@ -4,8 +4,8 @@ services:
     container_name: mood_mate_bot
     # restart: always
     build: .
-    # depends_on:
-    #   - kvira_redis
+    depends_on:
+      - mood_mate_redis
     networks:
       - bot_network
     # .env file
@@ -23,7 +23,7 @@ services:
     volumes:
       - ./redis_data:/data
       - ./redis_config/redis.conf:/usr/local/etc/redis/redis.conf
-    command: redis-server --save 60 1 --loglevel warning
+    command: redis-server /usr/local/etc/redis/redis.conf --save 60 1 --loglevel warning
     ports:
       - "16379:16379"
     environment:

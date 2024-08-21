@@ -9,26 +9,27 @@ DATA_TABLE = "users_data"
 class MoodData(BaseModel):
     """Data json structure for mood records:
     - `mood` (int): mood of the user
-    - `sleep` (int): hours of sleep
-    - `horny` (int): horny level
-    - `exercise` (int): hours of exercise
-    - `doping` (str): list of doping
+    - `sleep` (float): hours of sleep
     - `energy` (int): energy level
     - `anxiety` (int): anxiety level
+    - `exercise` (float): hours of exercise
+    - `dopings` (str): list of doping
+    - `horny` (int): horny level
     - `period` (str): period  (optional)
     - `note` (str): note from the user
     - `extra` (json): extra data
     """
     mood: int | None = None
-    sleep: int | None = None
+    sleep: float | None = None
     horny: int | None = None
-    exercise: int | None = None
-    doping: list = list()
+    exercise: float | None = None
+    dopings: list = list()
     energy: int | None = None
     anxiety: int | None = None
     period: bool | None = None
     note: str | None = None
     extra: dict | None = None
+    future_in_years: float | None = None
     
     class ConfigDict:
         orm_mode = True
@@ -56,7 +57,6 @@ async def add_mood_record_to_db(record: MoodRecord):
     Args:
         record (MoodRecord): _description_
     """
-    
     record_data_json = json.dumps(record.data.model_dump())
     
     await execute_query_with_lock(
