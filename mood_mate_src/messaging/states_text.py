@@ -53,7 +53,7 @@ mood_record_states_messages = {
         "emoji_explained": "Select the appropriate emoji that best reflects your mood. If you made a mistake, press the start over button",
         "anxiety": "What is your level of anxiety?",
         "energy": "What is your level of energy?",
-        "future_in_years": "Насколько определенно ты видишь свое будущее? Укажи примерно в годах.",
+        "future_in_years": "How certain do you see your future? Specify approximately in years.",
         "note": f"Anything to add? Write a note if you want. If not, just press the {BUTTONS_TEXT_LANG[Language.ENG.value]['do_not_save']} button",
         "invalid_number_input": "Invalid input. Enter a number separated by a dot if you want a non-integer",
         "record_saved": "I saved your record 🎉! Thank you for sharing your mood! 📝",

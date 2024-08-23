@@ -10,8 +10,7 @@ from mood_mate_src.database_tools.locks import user_db_lock
 from mood_mate_src.database_tools.query import execute_query_with_lock, DB_PATH, execute_query
 
 USERS_DB_TABLE = "users"
-default_reminder_time = datetime.strptime('19:00', '%H:%M').time()
-
+default_reminder_time = "19:00"
 
 class Language(Enum):
     ENG = "en"
@@ -52,7 +51,7 @@ class UserSettings(BaseModel):
     dopings_list: list = list()  # List to store JSON dopings
     gender: Gender | None = None
     periods_are_tracked: bool = False
-    reminder_time: str = str(default_reminder_time)
+    reminder_time: str = default_reminder_time
     reminder_enabled: bool = False
     username: str | None = None
 

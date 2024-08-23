@@ -2,6 +2,7 @@
 import asyncio
 from datetime import datetime, timedelta
 import random
+import pendulum
 
 from mood_mate_src.database_tools.users import User, UserSettings, get_all_users_from_db, default_reminder_time
 from mood_mate_src.messaging.send import send_message_to_user
@@ -14,7 +15,11 @@ async def notification_routine():
     """
     Periodically notify users about the mood record
     """
-    await schedule_daily_task(notify_users, hour=default_reminder_time.hour, minute=default_reminder_time.minute, name="notification_routine")
+    
+    default_reminder_time_pendulum = pendulum.parse(default_reminder_time)
+    await schedule_daily_task(notify_users, hour=default_reminder_time_pendulum.hour,
+                              minute=default_reminder_time_pendulum.minute,
+                              name="notification_routine")
 
 
 async def notify_user(user: User):
@@ -47,14 +52,15 @@ async def send_text_message_to_all_users(text):
 
 async def schedule_daily_task(task, hour=19, minute=0, name="notification_routine"):
     while True:
-        now = datetime.now()
+        now = pendulum.now(tz="Asia/Yerevan")
         target_time = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
         
         # If the target time is in the past, move it to the next day
         if now > target_time:
-            target_time += timedelta(days=1)
+            target_time = target_time.add(days=1)
+        
         time_to_wait = (target_time - now).total_seconds()
-        logger.info(f"Next {name} run scheduled at: {target_time} (in {time_to_wait} seconds)")
+        logger.info(f"Next {name} run scheduled at: {target_time.to_datetime_string()} (in {time_to_wait} seconds) (in {time_to_wait/60/60} hours)")
 
         # Wait until the scheduled time
         await asyncio.sleep(time_to_wait)
@@ -62,3 +68,4 @@ async def schedule_daily_task(task, hour=19, minute=0, name="notification_routin
         await task()
         # Wait one day before scheduling again
         await asyncio.sleep(24 * 60 * 60)
+
