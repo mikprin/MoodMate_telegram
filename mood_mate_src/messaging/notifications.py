@@ -30,7 +30,7 @@ async def notify_user(user: User):
     language = user.settings.language
     # Pick random message from the reminder_notification_text
     reminder_text = random.choice(reminder_notification_text[language])
-    print(f"Sending reminder to user {user.chat_id}: {reminder_text}")
+    logger.info(f"Sending reminder to user {user.settings.username}: {reminder_text}")
     await send_message_to_user(user.chat_id, reminder_text) 
 
 async def notify_users():
@@ -39,7 +39,7 @@ async def notify_users():
     # TODO refactor for custom notification time in future
     """
     users = get_all_users_from_db()
-    print(f"Users to notify: {users}")
+    logger.info(f"Users to notify: {[user.settings.username for user in users]}")
     for user in users:
         if user.settings.reminder_enabled:
             await notify_user(user)
@@ -60,7 +60,7 @@ async def schedule_daily_task(task, hour=19, minute=0, name="notification_routin
             target_time = target_time.add(days=1)
         
         time_to_wait = (target_time - now).total_seconds()
-        logger.info(f"Next {name} run scheduled at: {target_time.to_datetime_string()} (in {time_to_wait} seconds) (in {time_to_wait/60/60} hours)")
+        logger.info(f"Running {name}. Next {name} run scheduled at: {target_time.to_datetime_string()} (in {time_to_wait} seconds) (in {time_to_wait/60/60} hours)")
 
         # Wait until the scheduled time
         await asyncio.sleep(time_to_wait)

@@ -1,7 +1,7 @@
 import os
 import json
 from pydantic import BaseModel
-from mood_mate_src.database_tools.query import execute_query_with_lock, DB_PATH
+from mood_mate_src.database_tools.query import execute_query_with_lock, execute_query, DB_PATH
 from mood_mate_src.database_tools.locks import data_db_lock
 
 DATA_TABLE = "users_data"
@@ -67,3 +67,36 @@ async def add_mood_record_to_db(record: MoodRecord):
         VALUES (?, ?, ?, ?)
         ''',
         params=(record.user_id, record.date, record.created_at, record_data_json))
+    
+
+def get_mood_records_from_db(user_id: int) -> list[MoodRecord]:
+    """Get all mood records for a user from the database.
+
+    Args:
+        user_id (int): user id
+    Returns:
+        list[MoodRecord]: list of mood records
+    """
+    records = []
+    query = f'''
+    SELECT * FROM {DATA_TABLE}
+    WHERE user_id = ?
+    '''
+    rows = execute_query(
+        db_path=DB_PATH,
+        query=query,
+        params=(user_id,),
+        return_result=True,
+        dict_result=False)
+    
+    if rows is None:
+        return records
+    for row in rows:
+        record = MoodRecord(
+            user_id=row[0],
+            date=row[1],
+            created_at=row[2],
+            data=MoodData(**json.loads(row[3]))
+        )
+        records.append(record)
+    return records
