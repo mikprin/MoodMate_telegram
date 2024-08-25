@@ -21,6 +21,7 @@ BUTTONS_TEXT_LANG = {
     "track_periods_off": "Выключить ведение месячных",
     "cancel": "Отмена",
     "do_not_save": "Не сохранять запись",
+    "get_csv": "Скачать мои данные как CSV",
     },
     
     Language.ENG.value: {
@@ -37,9 +38,14 @@ BUTTONS_TEXT_LANG = {
     "track_periods_off": "Track periods off",
     "cancel": "Cancel",
     "do_not_save": "Do not save record",
+    "get_csv": "Download my data as CSV",
     }
 }
 
+def get_all_buttons_text(button_text: str) -> list[str]:
+    langs = [lang.value for lang in Language]
+    return [BUTTONS_TEXT_LANG[lang][button_text] for lang in langs]
+    
 
 def get_inline_keyboard_buttons_from_list(options: list[str], callback_group: str, picked_options: list[str] = list()) -> list[InlineKeyboardButton]:
     """Create a list of InlineKeyboardButtons from a list of options.
@@ -63,10 +69,6 @@ def get_inline_keyboard_buttons_from_list(options: list[str], callback_group: st
     keyboard_buttons.append([accept_button])
     return keyboard_buttons
 
-def get_all_buttons_text(button_text: str) -> list[str]:
-    langs = [lang.value for lang in Language]
-    return [BUTTONS_TEXT_LANG[lang][button_text] for lang in langs]
-    
 
 def get_lang(user: User | None = None) -> str:
     if user is None:

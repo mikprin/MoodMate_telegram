@@ -13,7 +13,8 @@ from mood_mate_src.database_tools.users import (
     User,
     UserSettings,
     Language,
-    process_user_db
+    process_user_db,
+    process_user_from_id,
 )
 
 from mood_mate_src.database_tools.mood_data import MoodRecord, MoodData, add_mood_record_to_db
@@ -89,7 +90,7 @@ async def track_mood_handler(message: Message, state: FSMContext):
 @router.callback_query(MoodCallbackFilter())
 async def mood_callback_handler(query: types.CallbackQuery, state: FSMContext):
     """Callback handler for mood emoji selection. Asks for the energy"""
-    user = await process_user_db(query)
+    user = await process_user_from_id(query.from_user.id)
     number = get_emoji_number_from_query(query)
     await state.update_data(mood=number)
     session = get_user_session(user.user_id)
@@ -139,7 +140,7 @@ async def add_sleep_handler(message: Message, state: FSMContext):
 async def energy_callback_handler(query: types.CallbackQuery, state: FSMContext):
     """Callback handler for energy emoji selection.
     Causes the anxiety level input"""
-    user = await process_user_db(query)
+    user = await process_user_from_id(query.from_user.id)
     number = get_emoji_number_from_query(query)
     # await state.update_data(energy=number)
     session = get_user_session(user.user_id)
@@ -157,7 +158,7 @@ async def energy_callback_handler(query: types.CallbackQuery, state: FSMContext)
 @router.callback_query(CallbackDataFilter(emotional_emoji_sets["anxiety"].data_type_names[0]))
 async def anxiety_callback_handler(query: types.CallbackQuery, state: FSMContext):
     """Callback handler for anxiety emoji selection and go to the exercise state"""
-    user = await process_user_db(query)
+    user = await process_user_from_id(query.from_user.id)
     number = get_emoji_number_from_query(query)
     session = get_user_session(user.user_id)
     session.mood_record.data.anxiety = number
@@ -239,7 +240,7 @@ async def dopings_callback_handler(query: types.CallbackQuery, state: FSMContext
 @router.callback_query(CallbackDataFilter(emotional_emoji_sets["horny"].data_type_names[0]))
 async def horny_callback_handler(query: types.CallbackQuery, state: FSMContext):
     """Callback handler for horny emoji selection"""
-    user = await process_user_db(query)
+    user = await process_user_from_id(query.from_user.id)
     number = get_emoji_number_from_query(query)
     session = get_user_session(user.user_id)
     session.mood_record.data.horny = number
@@ -280,7 +281,7 @@ async def process_end_of_session(user: User, session: UserSession):
     # TODO save the data to the DB
     await add_mood_record_to_db(session.mood_record)
     
-    logger.debug(f"User {user.user_id} saved the record: {session.mood_record.model_dump()}")
+    logger.debug(f"User {user.user_id} - {user.settings.username} saved the record: {session.mood_record.model_dump()}")
     remove_user_session(user.user_id)
 
 
@@ -288,7 +289,7 @@ async def process_end_of_session(user: User, session: UserSession):
 async def no_note_callback_handler(query: types.CallbackQuery, state: FSMContext):
     """Process the note input and save the record. Also delete the session
     In case the user does not want to leave a note"""
-    user = await process_user_db(query)
+    user = await process_user_from_id(query.from_user.id)
     session = get_user_session(user.user_id)
     
     await process_end_of_session(user, session)
@@ -304,7 +305,7 @@ async def no_note_callback_handler(query: types.CallbackQuery, state: FSMContext
 @router.callback_query(CallbackDataFilter("cancel_record"))
 async def cancel_record_callback_handler(query: types.CallbackQuery, state: FSMContext):
     """Cancel the record and delete the session"""
-    user = await process_user_db(query)
+    user = await process_user_from_id(query.from_user.id)
     session = get_user_session(user.user_id)
     remove_user_session(user.user_id)
     await state.clear()

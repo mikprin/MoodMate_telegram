@@ -36,6 +36,7 @@ mood_record_states_messages = {
         "invalid_number_input": "Некорректный ввод. Введите число, разделенное точкой, если хотите ввести не целое число",
         "record_saved": "Я сохранил твою запись 🎉! Спасибо за то, что делишься своим настроением! 📝",
         "record_not_saved": "Я не сохранил твою запись 🚫!",
+        "mood_analytics": "Здесь вы можете посмотреть свою статистику настроения и эмоций.",
     },
     
     Language.ENG.value: {
@@ -60,6 +61,7 @@ mood_record_states_messages = {
         "invalid_number_input": "Invalid input. Enter a number separated by a dot if you want a non-integer",
         "record_saved": "I saved your record 🎉! Thank you for sharing your mood! 📝",
         "record_not_saved": "I didn't save your record 🚫!",
+        "mood_analytics": "Here you can view your mood and emotions statistics.",
     },
     
 }
