@@ -92,7 +92,7 @@ async def change_language_handler(message: Message):
 # Start command handler
 @dp.message(CommandStart())
 async def start_command_handler(message: Message):
-    logger.info(f"User {message.from_user.username} with id {message.from_user.id} started the bot")
+    logger.info(f"User {message.from_user.username} with id {message.from_user.id} and chat_id {message.chat.id} started the bot")
     
     user = await process_user_db(message)
     greetings_msg = get_state_msg("greetings", user)

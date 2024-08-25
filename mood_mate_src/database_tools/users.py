@@ -53,7 +53,7 @@ class UserSettings(BaseModel):
     gender: Gender | None = None
     periods_are_tracked: bool = False
     reminder_time: str = default_reminder_time
-    reminder_enabled: bool = False
+    reminder_enabled: bool = True
     username: str | None = None
 
     class ConfigDict:

@@ -26,11 +26,21 @@ async def send_message_to_user(chat_id: int, text: str, disable_notification: bo
     #     return await send_message_to_user(user_id, text)  # Recursive call
     # except exceptions.UserDeactivated:
     #     logger.error(f"Target [ID:{user_id}]: user is deactivated")
+    except exceptions.TelegramRetryAfter as e:
+        logger.exception(f"Target [ID:{chat_id}]: retry after")
+        asyncio.sleep(e.timeout)
+        return await send_message_to_user(chat_id, text)
+    except exceptions.TelegramBadRequest:
+        logger.exception(f"Target [ID:{chat_id}]: bad request")
+        await bot.session.close()
     except exceptions.TelegramAPIError:
         logger.exception(f"Target [ID:{chat_id}]: failed")
+
+
     except Exception as e:
         logger.exception(f"Target [ID:{chat_id}]: failed with exception {e}")
     else:
         logger.info(f"Send message: Target [ID:{chat_id}]: success")
+        await bot.session.close()
         return True
     return False

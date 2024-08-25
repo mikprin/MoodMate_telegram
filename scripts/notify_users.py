@@ -1,5 +1,5 @@
 # Add parent directory to sys.path
-import sys,os
+import sys, os
 
 script_path = os.path.abspath(__file__)
 sys.path.append(os.path.join(os.path.dirname(script_path), '..'))
