@@ -3,3 +3,4 @@ python-dotenv
 pydantic==2.3
 redis==5.0.8
 pendulum
+pandas

@@ -179,10 +179,28 @@ def get_all_users_from_db() -> list[User]:
         users.append(user)
     return users
 
-
-async def process_user_db(message: Message):
+async def process_user_from_id(user_id: int) -> User | None:
     """Process the user database when new msg arrives
     Effectively creates or retrieves the user from the database
+    
+    Args:
+        user_id (int): user id
+    """
+    user = get_user_from_db(user_id)
+    if user is None:
+        logger.error(f"User with id {user_id} not found in the database.")
+        return None
+    return user
+
+async def process_user_db(message: Message) -> User | None:
+    """Process the user database when new msg arrives
+    Effectively creates or retrieves the user from the database
+    
+    Args:
+        message (Message): message object
+        
+    Returns:
+        User: user object
     """
     user = get_user_from_db(message.from_user.id)
     if user is None:

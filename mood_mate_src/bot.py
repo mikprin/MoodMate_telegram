@@ -10,6 +10,7 @@ from mood_mate_src.database_tools.db_init import init_db
 
 from mood_mate_src.messaging.states_text import mood_record_states_messages, get_state_msg
 from mood_mate_src import additional_routers, mood_survey_router
+from mood_mate_src.analytics import analytics_routers
 from mood_mate_src.filters import ButtonTextFilter, CallbackDataFilter
 
 from mood_mate_src.database_tools.users import (
@@ -20,6 +21,7 @@ from mood_mate_src.database_tools.users import (
     add_user_to_db,
     update_user_in_db,
     process_user_db,
+    process_user_from_id,
     Language,
 )
 from mood_mate_src.keyboard import (
@@ -35,6 +37,8 @@ dp = Dispatcher()
 dp.include_router(additional_routers.router)
 # In mood_survey_router.py I collected all the handlers related to the mood survey to get MoodRecord from the user
 dp.include_router(mood_survey_router.router)
+# Handlers for analytics
+dp.include_router(analytics_routers.router)
 
 token = getenv("TELEGRAM_BOT_TOKEN")
 bot = Bot(token, parse_mode=ParseMode.HTML)
@@ -77,7 +81,7 @@ async def settings_handler(message: Message):
 
 @dp.callback_query(CallbackDataFilter("change_language"))
 async def change_language_callback_handler(query: types.CallbackQuery):
-    user = await process_user_db(query.message)
+    user = await process_user_from_id(query.from_user.id)
     new_lang = Language.RU.value if user.settings.language == Language.ENG.value else Language.ENG.value
     user.settings.language = new_lang
     await update_user_in_db(user)
@@ -88,7 +92,7 @@ async def change_language_callback_handler(query: types.CallbackQuery):
 
 @dp.callback_query(CallbackDataFilter("toggle_reminder"))
 async def toggle_reminder_callback_handler(query: types.CallbackQuery):
-    user = await process_user_db(query.message)
+    user = await process_user_from_id(query.from_user.id)
     user.settings.reminder_enabled = not user.settings.reminder_enabled
     await update_user_in_db(user)
     await query.answer()
