@@ -13,7 +13,7 @@ BUTTONS_TEXT_LANG = {
     "track_mood": "Записать настроение",
     "help": "Помощь",
     "change_language": "🌐",
-    "toggle_reminder": "Включить/выключить напоминания от бота",
+    "toggle_reminder": "Напоминания от бота",
     "mood_data": "Аналитика настроения",
     "pick_emoji": "Выберите пиктограмму",
     "accept": "Принять",
@@ -112,6 +112,30 @@ def get_settings_keyboard(user: User | None = None):
         input_field_placeholder="ТЫК"
     )
     return keyboard
+
+def get_inline_settings_keyboard(user: User | None = None) -> InlineKeyboardBuilder:
+        
+        if user is None:
+            language = Language.ENG.value
+        else:
+            language = get_lang(user)
+        keyboard = types.InlineKeyboardMarkup(inline_keyboard=[
+            [
+                InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["change_language"],
+                                    callback_data="change_language")
+            ],
+            [
+                InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["toggle_reminder"],
+                                    callback_data="toggle_reminder"),
+            ],
+            # [
+            #     InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["go_back"],
+            #                          callback_data="main_menu"),
+            # ]
+        ]
+        )
+        return keyboard
+        
 
 class EmojiSet():
     """EmojiSet class is used to store a set of emojis for a specific mood or emotion.

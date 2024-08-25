@@ -188,4 +188,5 @@ async def process_user_db(message: Message):
     if user is None:
         user = create_user_from_telegram_message(message)
         await add_user_to_db(user)
+        logger.info(f"User {user.settings.username} added to the database with chat_id {user.chat_id}")
     return user
