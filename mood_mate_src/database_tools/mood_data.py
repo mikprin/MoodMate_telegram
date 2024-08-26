@@ -38,7 +38,7 @@ class MoodRecord(BaseModel):
     """Root record object for mood records. Prototype for the database:
     (
     user_id INTEGER,
-    date DATE NOT NULL,
+    date DATE NOT NULL,data
     created_at INTEGER NOT NULL,
     data JSON NOT NULL)
     """

@@ -23,7 +23,7 @@ mood_record_states_messages = {
         "mood": "Какое у тебя сейчас настроение?",
         "sleep": "Сколько часов ты спал(а) сегодня? Введите число сообщением. Разделенное точкой если хочется не целое.",
         "horny": "Какой у тебя субъективный уровень возбуждения?",
-        "exercise": "Примерно сколько часов ты занимался(ась) спортом? Введите число разделенное точкой если хочется не целое",
+        "exercise": "Примерно сколько часов ты занимался(ась) спортом? Введите число разделенное точкой если хочется не целое.\nЕсли еще не тренировался но планируешь, ставь 0 и сделай еще одну запись о настроении после тренировки! Я учту это в статистике. Твои усилия будут записаны!",
         "dopings": "Какие допинги ты употребил(а) сегодня? Отметь по кнопкам! Если нужных нет в списке, введи их текстом через запятую, в конце нажми кнопку продолжить",
         "lang_changed": "Язык изменен на русский",
         "toggle_reminder_off": "Напоминания теперь отключены.\nНапоминания можно включить обратно в настройках. Помни что напоминания помогают не забывать делать записи о настроении!",
@@ -37,6 +37,7 @@ mood_record_states_messages = {
         "record_saved": "Я сохранил твою запись 🎉! Спасибо за то, что делишься своим настроением! 📝",
         "record_not_saved": "Я не сохранил твою запись 🚫!",
         "mood_analytics": "Здесь вы можете посмотреть свою статистику настроения и эмоций.",
+        "not_enough_records": "У вас недостаточно записей для аналитики. Сделайте еще записей и попробуйте снова!",
     },
     
     Language.ENG.value: {
@@ -47,7 +48,7 @@ mood_record_states_messages = {
         "mood": "How are you feeling right now?",
         "sleep": "How many hours did you sleep today? Enter a number separated by a dot if you want a non-integer",
         "horny": "What is your subjective level of sexual arousal?",
-        "exercise": "Approximately how many hours did you exercise? Enter a number separated by a dot if you want a non-integer",
+        "exercise": "Approximately how many hours did you exercise? Enter a number separated by a dot if you want a non-integer.\nIf you haven't exercised yet but plan to, put 0 and make another mood record after the workout! I will take this into account in the statistics. Your efforts will be recorded!",
         "dopings": "What doping did you take today? Check the buttons! If the necessary ones are not in the list, enter them in text separated by commas, at the end press the continue button",
         "lang_changed": "Language changed to English",
         "record_reminder": "Hello! I want to remind you to make a record of your mood! Press the button to start",
@@ -62,6 +63,7 @@ mood_record_states_messages = {
         "record_saved": "I saved your record 🎉! Thank you for sharing your mood! 📝",
         "record_not_saved": "I didn't save your record 🚫!",
         "mood_analytics": "Here you can view your mood and emotions statistics.",
+        "not_enough_records": "You don't have enough records for analytics. Make more records and try again!",
     },
     
 }

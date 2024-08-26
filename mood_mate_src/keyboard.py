@@ -22,6 +22,7 @@ BUTTONS_TEXT_LANG = {
     "cancel": "Отмена",
     "do_not_save": "Не сохранять запись",
     "get_csv": "Скачать мои данные как CSV",
+    "get_plot": "Хочу график! 📈",
     },
     
     Language.ENG.value: {
@@ -39,6 +40,7 @@ BUTTONS_TEXT_LANG = {
     "cancel": "Cancel",
     "do_not_save": "Do not save record",
     "get_csv": "Download my data as CSV",
+    "get_plot": "I want a plot! 📈",
     }
 }
 

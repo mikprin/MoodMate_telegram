@@ -4,7 +4,8 @@ from datetime import datetime, timedelta
 import random
 import pendulum
 
-from mood_mate_src.database_tools.users import User, UserSettings, get_all_users_from_db, default_reminder_time
+from mood_mate_src.database_tools.schema import User, Language, default_reminder_time
+from mood_mate_src.database_tools.users import get_all_users_from_db
 from mood_mate_src.messaging.send import send_message_to_user
 from mood_mate_src.mate_logger import logger
 from mood_mate_src.messaging.states_text import reminder_notification_text

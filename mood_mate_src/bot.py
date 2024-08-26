@@ -17,8 +17,6 @@ from mood_mate_src.database_tools.users import (
     create_user_from_telegram_message,
     User,
     UserSettings,
-    get_user_from_db,
-    add_user_to_db,
     update_user_in_db,
     process_user_db,
     process_user_from_id,
