@@ -26,6 +26,7 @@ from mood_mate_src.keyboard import (
 from mood_mate_src.mate_logger import logger
 from mood_mate_src.analytics.convert import get_user_pandas_df
 from mood_mate_src.messaging.send import send_file_to_user
+from mood_mate_src.analytics.plotting import get_plot_from_df
 
 router = Router()
 
@@ -46,13 +47,18 @@ async def track_mood_handler(message: Message, state: FSMContext):
                 InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["get_csv"],
                                     callback_data="get_csv")
             ],
+            [
+                InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["get_plot"],
+                                     callback_data="get_plot_all"),
+            ]
             # [
             #     InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["toggle_reminder"],
             #                         callback_data="toggle_reminder"),
             # ],
         ]
     )
-    await message.answer(get_state_msg("get_csv", user), reply_markup=keyboard)
+    await message.answer(BUTTONS_TEXT_LANG[language]["mood_data"], reply_markup=keyboard)
+
 
 @router.callback_query(CallbackDataFilter("get_csv"))
 async def get_csv_handler(call: types.CallbackQuery):
@@ -72,3 +78,27 @@ async def get_csv_handler(call: types.CallbackQuery):
         # Remove the file
         os.remove(csv_path)
         logger.info(f"CSV file sent to user {user.settings.username}")
+        
+
+@router.callback_query(CallbackDataFilter("get_plot_all"))
+async def get_plot_all_handler(call: types.CallbackQuery):
+    """Get the plot with the mood records"""
+    user = await process_user_from_id(call.from_user.id)
+    logger.info(f"User {user.settings.username} requested the plot")
+    # Get the CSV file
+    df = get_user_pandas_df(user.user_id)
+    
+    if df.shape[0] == 0:
+        await call.answer()
+        await call.message.answer(get_state_msg("not_enough_records", user))
+    else:
+        # Get tempdir path
+        with tempfile.TemporaryDirectory() as tempdir:
+            file_name = f"{user.user_id}_plot.png"
+            plot_path = os.path.join(tempdir, file_name)
+            get_plot_from_df(df, plot_path, language=user.settings.language)
+            await call.answer()
+            await call.message.answer_photo(FSInputFile(plot_path))
+            # Remove the file
+            os.remove(plot_path)
+            logger.info(f"Plot sent to user {user.settings.username}")

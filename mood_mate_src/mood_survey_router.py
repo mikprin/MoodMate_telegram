@@ -42,6 +42,7 @@ def get_emoji_number_from_query(query: types.CallbackQuery) -> int:
     """Get the number from the emoji query"""
     return int(query.data.split('_')[1])
 
+
 def validate_number_input(number: str) -> bool:
     """Validate if the input is a number"""
     try:
@@ -112,6 +113,7 @@ async def add_mood_handler(message: Message, state: FSMContext):
     await message.answer(f"{get_state_msg('sleep', user)}\n{emotional_emoji_sets['energy'].get_comment(user.settings.language)}",
                          reply_markup=types.ReplyKeyboardRemove())
 
+
 @router.message(AddRecord.sleep)
 async def add_sleep_handler(message: Message, state: FSMContext):
     """Process the sleep input and
@@ -166,7 +168,7 @@ async def anxiety_callback_handler(query: types.CallbackQuery, state: FSMContext
     
     await state.set_state(AddRecord.exercise)
     
-    await query.answer(f"DEBUG: You entered: {number}")
+    await query.answer()
     
     await query.message.answer(f"{get_state_msg('exercise', user)}",
                                   reply_markup=types.ReplyKeyboardRemove())
@@ -273,6 +275,7 @@ async def add_futre_in_years_handler(message: Message, state: FSMContext):
         await state.set_state(AddRecord.note)
         await message.answer(f"{get_state_msg('note', user)}", reply_markup=keyboard)
 
+
 async def process_end_of_session(user: User, session: UserSession):
     """Process the end of the session
     Save it to DB and remove from cache"""
@@ -302,6 +305,7 @@ async def no_note_callback_handler(query: types.CallbackQuery, state: FSMContext
     await query.answer()
     await query.message.answer(f"{get_state_msg('record_saved', user)}", reply_markup=get_start_keyboard(user=user))
 
+
 @router.callback_query(CallbackDataFilter("cancel_record"))
 async def cancel_record_callback_handler(query: types.CallbackQuery, state: FSMContext):
     """Cancel the record and delete the session"""
@@ -311,6 +315,7 @@ async def cancel_record_callback_handler(query: types.CallbackQuery, state: FSMC
     await state.clear()
     await query.answer()
     await query.message.answer(f"{get_state_msg('record_not_saved', user)}", reply_markup=get_start_keyboard(user=user))
+
 
 @router.message(AddRecord.note)
 async def add_note_handler(message: Message, state: FSMContext):
