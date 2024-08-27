@@ -11,8 +11,6 @@ from mood_mate_src.states_machine import AddRecord
 from mood_mate_src.messaging.send import send_message_to_user
 from mood_mate_src.database_tools.users import (
     User,
-    UserSettings,
-    Language,
     process_user_db,
     process_user_from_id,
 )

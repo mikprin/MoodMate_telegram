@@ -88,7 +88,7 @@ async def get_plot_all_handler(call: types.CallbackQuery):
     # Get the CSV file
     df = get_user_pandas_df(user.user_id)
     
-    if df.shape[0] == 0:
+    if df.shape[0] < 2:
         await call.answer()
         await call.message.answer(get_state_msg("not_enough_records", user))
     else:
