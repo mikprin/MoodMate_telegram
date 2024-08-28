@@ -190,7 +190,7 @@ def get_plot_from_df(df: pd.DataFrame,
     axes[numbers_map['future_in_years']].set_title(f'{over_time_it("future_in_years", language=language)}', color='white')
 
     axes[numbers_map['exercise']].plot(df['created_at'], df['exercise'], color=colors['exercise'], linewidth=line_width)
-    axes[numbers_map['exercise']].set_ylabel(f'Exercise')
+    axes[numbers_map['exercise']].set_ylabel(f'{axis_names[language]["exercise"]}')
     axes[numbers_map['exercise']].set_title(f'{over_time_it("exercise", language=language)}', color='white')
 
     axes[numbers_map['anxiety']].plot(df['created_at'], df['anxiety'], color=colors['anxiety'], linewidth=line_width)
