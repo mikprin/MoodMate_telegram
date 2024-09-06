@@ -14,3 +14,8 @@ class AddRecord(StatesGroup):
     period = State()
     note = State()
     extra = State()
+
+
+class SettingsStates(StatesGroup):
+    """States implementing each field in UserSettings model"""
+    recommended_sleep = State()

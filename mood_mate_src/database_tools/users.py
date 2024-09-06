@@ -13,12 +13,17 @@ from mood_mate_src.database_tools.query import execute_query_with_lock, DB_PATH,
 from mood_mate_src.database_tools.schema import (
     UserSettings,
     User,
-    Language
+    Language,
+    Doping,
 )
 
 USERS_DB_TABLE = "users"
 
 
+
+# default_dopings = [
+
+# ]
 
 default_dopings_list = {
     Language.ENG.value: [
@@ -44,8 +49,6 @@ default_dopings_list = {
 }
 
 
-
-
 def create_user_from_telegram_message(message: Message) -> User:
     lang_code = message.from_user.language_code
 
@@ -63,6 +66,7 @@ def create_user_from_telegram_message(message: Message) -> User:
             dopings_list=default_dopings_list[language.value],
             created_at = int(datetime.now().timestamp()),
             language=language.value,
+            recommended_sleep=8,
         )
     )
 

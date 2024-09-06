@@ -2,6 +2,18 @@ from aiogram.filters import BaseFilter
 from aiogram.types import Message, CallbackQuery
 from mood_mate_src.keyboard import emotional_emoji_sets
 from mood_mate_src.admins import admins
+
+
+def validate_number_input(number: str) -> bool:
+    """Validate if the input is a number"""
+    try:
+        num_f = float(number)
+        if num_f < 0:
+            return False
+        return num_f
+    except ValueError:
+        return False
+
 class ButtonTextFilter(BaseFilter):
     """
     Filter for checking if the message text is in the list of button texts

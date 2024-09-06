@@ -38,6 +38,8 @@ mood_record_states_messages = {
         "record_not_saved": "Я не сохранил твою запись 🚫!",
         "mood_analytics": "Здесь вы можете посмотреть свою статистику настроения и эмоций.",
         "not_enough_records": "У вас недостаточно записей для аналитики. Сделайте еще записей и попробуйте снова!",
+        "recommended_sleep": "Сколько часов тебе рекомендуется спать в среднем? Введите число сообщением. Разделенное точкой если хочется не целое. Используй 0 чтобы установить None",
+        "recommended_sleep_set": "Рекомендуемое время сна установлено",
     },
     
     Language.ENG.value: {
@@ -64,6 +66,8 @@ mood_record_states_messages = {
         "record_not_saved": "I didn't save your record 🚫!",
         "mood_analytics": "Here you can view your mood and emotions statistics.",
         "not_enough_records": "You don't have enough records for analytics. Make more records and try again!",
+        "recommended_sleep": "How many hours are you recommended to sleep on average? Enter a number separated by a dot if you want a non-integer. Use 0 to set it to None",
+        "recommended_sleep_set": "The recommended sleep time is set",
     },
     
 }
