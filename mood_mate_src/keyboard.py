@@ -2,8 +2,8 @@ from aiogram.types.keyboard_button import KeyboardButton
 from aiogram.types.inline_keyboard_button import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram import types
+import emoji
 from mood_mate_src.database_tools.users import Language, User
-from abc import ABC
 
 
 BUTTONS_TEXT_LANG = {
@@ -23,6 +23,7 @@ BUTTONS_TEXT_LANG = {
     "do_not_save": "Не сохранять запись",
     "get_csv": "Скачать мои данные как CSV",
     "get_plot": "Хочу график! 📈",
+    "set_recommended_sleep": "Установить рекомендуемое время сна. 🛌",
     },
     
     Language.ENG.value: {
@@ -41,6 +42,7 @@ BUTTONS_TEXT_LANG = {
     "do_not_save": "Do not save record",
     "get_csv": "Download my data as CSV",
     "get_plot": "I want a plot! 📈",
+    "set_recommended_sleep": "Set recommended sleep time. 🛌",
     }
 }
 
@@ -107,6 +109,7 @@ def get_settings_keyboard(user: User | None = None):
         [
             KeyboardButton(text=BUTTONS_TEXT_LANG[language]["change_language"]),
             KeyboardButton(text=BUTTONS_TEXT_LANG[language]["toggle_reminder"]),
+            KeyboardButton(text=BUTTONS_TEXT_LANG[language]["set_recommended_sleep"]),
             KeyboardButton(text=BUTTONS_TEXT_LANG[language]["go_back"]),
         ]
     ]
@@ -127,6 +130,10 @@ def get_inline_settings_keyboard(user: User | None = None) -> InlineKeyboardBuil
             [
                 InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["change_language"],
                                     callback_data="change_language")
+            ],
+            [
+                InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["set_recommended_sleep"],
+                                    callback_data="set_recommended_sleep"),
             ],
             [
                 InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["toggle_reminder"],
@@ -194,6 +201,11 @@ class EmojiSet():
         for button in keyboard_buttons:
             builder.add(button)
         return builder
+
+def find_emojis_in_string(string: str) -> list:
+    """Find all emojis in a string."""
+    return [char for char in string if char in emoji.EMOJI_DATA]
+
 
 emotional_emoji_sets = {
     

@@ -96,7 +96,7 @@ async def get_plot_all_handler(call: types.CallbackQuery):
         with tempfile.TemporaryDirectory() as tempdir:
             file_name = f"{user.user_id}_plot.png"
             plot_path = os.path.join(tempdir, file_name)
-            get_plot_from_df(df, plot_path, language=user.settings.language)
+            get_plot_from_df(df, plot_path, language=user.settings.language, user=user)
             await call.answer()
             await call.message.answer_photo(FSInputFile(plot_path))
             # Remove the file

@@ -4,5 +4,7 @@ pydantic==2.3
 redis==5.0.8
 pendulum
 pandas
-matplotlib>=3.0.0
+matplotlib<3.11
 scipy==1.14.1
+emoji==2.12.1
+requests

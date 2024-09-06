@@ -24,7 +24,12 @@ from mood_mate_src.database_tools.redis_tools import (
     save_user_session,
     remove_user_session,
 )
-from mood_mate_src.filters import ButtonTextFilter, MoodCallbackFilter, CallbackDataFilter
+from mood_mate_src.filters import (
+    ButtonTextFilter,
+    MoodCallbackFilter,
+    CallbackDataFilter,
+    validate_number_input,
+)
 from mood_mate_src.mate_logger import logger
 from mood_mate_src.keyboard import (
     get_all_buttons_text,
@@ -41,15 +46,6 @@ def get_emoji_number_from_query(query: types.CallbackQuery) -> int:
     return int(query.data.split('_')[1])
 
 
-def validate_number_input(number: str) -> bool:
-    """Validate if the input is a number"""
-    try:
-        num_f = float(number)
-        if num_f < 0:
-            return False
-        return num_f
-    except ValueError:
-        return False
 
 
 router = Router()

@@ -70,51 +70,6 @@ async def go_back_handler(message: Message):
     # )
     await message.answer("Menu",reply_markup=new_keyboard)
 
-@dp.message(ButtonTextFilter(get_all_buttons_text("settings")))
-async def settings_handler(message: Message):
-    user = await process_user_db(message)
-    await message.answer("Settings", reply_markup=get_inline_settings_keyboard(user=user))
-
-# Add settings callbacks:
-
-@dp.callback_query(CallbackDataFilter("change_language"))
-async def change_language_callback_handler(query: types.CallbackQuery):
-    user = await process_user_from_id(query.from_user.id)
-    new_lang = Language.RU.value if user.settings.language == Language.ENG.value else Language.ENG.value
-    user.settings.language = new_lang
-    await update_user_in_db(user)
-    await query.answer()
-    await query.message.edit_text(f"{get_state_msg('lang_changed', user)}",
-                                  reply_markup=get_inline_settings_keyboard(user=user))
-
-
-@dp.callback_query(CallbackDataFilter("toggle_reminder"))
-async def toggle_reminder_callback_handler(query: types.CallbackQuery):
-    user = await process_user_from_id(query.from_user.id)
-    user.settings.reminder_enabled = not user.settings.reminder_enabled
-    await update_user_in_db(user)
-    await query.answer()
-    reminder_state = "on" if user.settings.reminder_enabled else "off"
-    await query.message.edit_text(f"{get_state_msg('toggle_reminder_' + reminder_state, user)}",
-                                  reply_markup=get_inline_settings_keyboard(user=user))
-
-@dp.message(ButtonTextFilter(get_all_buttons_text("toggle_reminder")))
-async def toggle_reminder_handler(message: Message):
-    user = await process_user_db(message)
-    user.settings.reminder_enabled = not user.settings.reminder_enabled
-    await update_user_in_db(user)
-    reminder_state = "on" if user.settings.reminder_enabled else "off"
-    await message.answer(f"{get_state_msg('toggle_reminder_' + reminder_state, user)}",
-                         reply_markup=get_settings_keyboard(user=user))
-
-@dp.message(ButtonTextFilter(get_all_buttons_text("change_language")))
-async def change_language_handler(message: Message):
-    user = await process_user_db(message)
-    new_lang = Language.RU.value if user.settings.language == Language.ENG.value else Language.ENG.value
-    user.settings.language = new_lang
-    await update_user_in_db(user)
-    await message.answer(f"{get_state_msg('lang_changed', user)}", reply_markup=get_settings_keyboard(user=user))
-
 # Start command handler
 @dp.message(CommandStart())
 async def start_command_handler(message: Message):
