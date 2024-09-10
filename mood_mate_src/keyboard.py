@@ -189,10 +189,12 @@ class EmojiSet():
         ]
         return keyboard_buttons
     
-    def get_comment(self, language: Language = Language.ENG):
+    def get_comment(self, language: str = Language.ENG.value):
         if self.comment is None:
             return ""
-        return self.comment[language.value]
+        elif language not in self.comment:
+            return ""
+        return self.comment[language]
     
     def get_keyboard_builder(self) -> InlineKeyboardBuilder:
         
