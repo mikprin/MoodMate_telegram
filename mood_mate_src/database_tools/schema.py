@@ -24,6 +24,7 @@ class UserSettings(BaseModel):
     gender: Gender | None = None
     recommended_sleep: float | None = None
     username: str | None = None
+    weekly_report_enabled: bool | None = None
 
     class ConfigDict:
         orm_mode = True

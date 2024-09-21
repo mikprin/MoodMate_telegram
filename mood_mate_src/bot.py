@@ -1,7 +1,5 @@
 from os import getenv
 from aiogram import Bot, Dispatcher, types, F
-from aiogram.types import Message, KeyboardButton
-from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart, Command
 from aiogram.types import Message
 
@@ -11,7 +9,9 @@ from mood_mate_src.database_tools.db_init import init_db
 from mood_mate_src.messaging.states_text import mood_record_states_messages, get_state_msg
 from mood_mate_src import additional_routers, mood_survey_router
 from mood_mate_src.analytics import analytics_routers
+from mood_mate_src import settings
 from mood_mate_src.filters import ButtonTextFilter, CallbackDataFilter
+from mood_mate_src.aiogram_utils.bot import get_bot
 
 from mood_mate_src.database_tools.users import (
     create_user_from_telegram_message,
@@ -37,9 +37,10 @@ dp.include_router(additional_routers.router)
 dp.include_router(mood_survey_router.router)
 # Handlers for analytics
 dp.include_router(analytics_routers.router)
+# Settings handlers
+dp.include_router(settings.router)
 
-token = getenv("TELEGRAM_BOT_TOKEN")
-bot = Bot(token, parse_mode=ParseMode.HTML)
+bot = get_bot()
 
 admin_ids_users = getenv("ADMIN_CHATS")
 ADMIN_LOG_MSG_TXT = "Mood bot admin update:"
@@ -69,6 +70,7 @@ async def go_back_handler(message: Message):
     #     reply_markup=new_keyboard
     # )
     await message.answer("Menu",reply_markup=new_keyboard)
+
 
 # Start command handler
 @dp.message(CommandStart())

@@ -1,6 +1,6 @@
-aiogram==3.1.1
+aiogram==3.13.1
 python-dotenv
-pydantic==2.3
+pydantic==2.9.2 
 redis==5.0.8
 pendulum
 pandas
@@ -8,3 +8,4 @@ matplotlib<3.11
 scipy==1.14.1
 emoji==2.12.1
 requests
+openai==1.45.0

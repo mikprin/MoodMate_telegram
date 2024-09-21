@@ -24,6 +24,14 @@ from mood_mate_src.keyboard import (
 )
 
 
+from mood_mate_src.filters import AdminFilter
+from mood_mate_src.database_tools.users import get_all_users_from_db, User
+from mood_mate_src.analytics.user_analytics import get_user_statistics_text
+
+from mood_mate_src.messaging.send import send_message_to_user
+
+from mood_mate_src.messaging.notifications import weekly_report
+
 router = Router()
 
 @router.edited_message()
@@ -38,7 +46,7 @@ async def send_message_to_users(message: types.Message) -> None:
     # Remove /send_message_to_users from the text
     text = text.replace("/send_message_to_users", "")
     if len(text) == 0 or text.isspace():
-        await message.answer("Please provide the text to send.")
+        await message.answer("Please provide text to send.")
     for user in users:
         await send_message_to_user(user.chat_id, text)
         
@@ -107,3 +115,12 @@ async def set_recommended_sleep_handler(message: Message, state: FSMContext):
     await update_user_in_db(user)
     await state.clear()
     await message.answer(get_state_msg("recommended_sleep_set", user), reply_markup=get_start_keyboard(user=user))   
+@router.message(Command("get_stats"), AdminFilter())
+async def get_stats(message: types.Message) -> None:
+    stats = get_user_statistics_text()
+    await message.answer(stats)
+    
+@router.message(Command("send_weekly_report"), AdminFilter())
+async def send_weekly_report(message: types.Message) -> None:
+    await weekly_report()
+    await message.answer("Weekly report sent.")

@@ -1,5 +1,7 @@
 import os
 import json
+from datetime import datetime, timedelta
+
 from pydantic import BaseModel
 from mood_mate_src.database_tools.query import execute_query_with_lock, execute_query, DB_PATH
 from mood_mate_src.database_tools.locks import data_db_lock
@@ -99,4 +101,90 @@ def get_mood_records_from_db(user_id: int) -> list[MoodRecord]:
             data=MoodData(**json.loads(row[3]))
         )
         records.append(record)
+    return records
+
+
+def get_user_records_for_past_time(user_id: int, time_period: int) -> list[MoodRecord]:
+    """Get all mood records for a user from the database for the past time period.
+
+    Args:
+        time_period (timedelta): Time period to filter records (e.g., last week, last month).
+        user_id (int): User ID
+
+    Returns:
+        list[MoodRecord]: List of mood records for the user within the specified time period.
+    """
+    records = []
+    
+    # Calculate the starting date (current time - time_period)
+    start_date = int(datetime.now().timestamp()) - time_period
+    
+    # Cast start_date to int
+    
+    
+    query = f'''
+    SELECT * FROM {DATA_TABLE}
+    WHERE user_id = ? AND created_at >= ?
+    '''
+    rows = execute_query(
+        db_path=DB_PATH,
+        query=query,
+        params=(user_id, start_date),  # Passing the start date as a parameter
+        return_result=True,
+        dict_result=False,
+    )
+    
+    if rows is None:
+        return records
+    
+    for row in rows:
+        record = MoodRecord(
+            user_id=row[0],
+            date=row[1],
+            created_at=row[2],
+            data=MoodData(**json.loads(row[3]))
+        )
+        records.append(record)
+    
+    return records
+
+
+def get_all_records_for_past_time(time_period: int) -> list[MoodRecord]:
+    """Get all mood records from the database for the past time period.
+
+    Args:
+        time_period (timedelta): Time period to filter records (e.g., last week, last month).
+
+    Returns:
+        list[MoodRecord]: List of mood records within the specified time period.
+    """
+    records = []
+    
+    # Calculate the starting date (current time - time_period)
+    start_date = int(datetime.now().timestamp()) - time_period
+    
+    query = f'''
+    SELECT * FROM {DATA_TABLE}
+    WHERE created_at >= ?
+    '''
+    rows = execute_query(
+        db_path=DB_PATH,
+        query=query,
+        params=(start_date,),  # Passing the start date as a parameter
+        return_result=True,
+        dict_result=False,
+    )
+    
+    if rows is None:
+        return records
+    
+    for row in rows:
+        record = MoodRecord(
+            user_id=row[0],
+            date=row[1],
+            created_at=row[2],
+            data=MoodData(**json.loads(row[3]))
+        )
+        records.append(record)
+    
     return records

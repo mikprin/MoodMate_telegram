@@ -33,8 +33,10 @@ default_dopings_list = {
                         "Alcohol: 🍺 or 🍷",
                         "Weed: 🌿",
                         "Mushrooms: 🍄",
-                        # "LSD: 🌈",
+                        "🌈",
                         "Pills?: 💊",
+                        "Sugar: 🍬",
+                        "Vitamins/Supplements: 🍊"
                         ],
     Language.RU.value: [
                         "Кофе/кофеин: ☕",
@@ -43,8 +45,10 @@ default_dopings_list = {
                         "Алкоголь: 🍺 или 🍷",
                         "Трава: 🌿",
                         "Грибы: 🍄",
-                        # "ЛСД: 🌈",
+                        "🌈",
                         "Таблетки?: 💊",
+                        "Сахар: 🍬",
+                        "Витамины/БАД: 🍊"
                         ]
 }
 
@@ -67,6 +71,7 @@ def create_user_from_telegram_message(message: Message) -> User:
             created_at = int(datetime.now().timestamp()),
             language=language.value,
             recommended_sleep=8,
+            weekly_report_enabled=True,
         )
     )
 
@@ -190,3 +195,14 @@ async def process_user_db(message: Message) -> User | None:
         await add_user_to_db(user)
         logger.info(f"User {user.settings.username} added to the database with chat_id {user.chat_id}")
     return user
+
+async def delete_user_from_db(user_id: int):
+    # Delete the user from the database
+    await execute_query_with_lock(
+        db_path=DB_PATH,
+        db_lock=user_db_lock,
+        query=f'''
+        DELETE FROM {USERS_DB_TABLE} WHERE user_id = ?
+        ''',
+        params=(user_id,))
+    logger.info(f"User with id {user_id} deleted from the database.")

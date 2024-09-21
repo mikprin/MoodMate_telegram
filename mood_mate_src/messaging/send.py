@@ -7,11 +7,10 @@ from aiogram.types import Message, KeyboardButton
 from aiogram.enums import ParseMode
 
 from mood_mate_src.mate_logger import logger
+from mood_mate_src.aiogram_utils.bot import get_bot
 
 
-
-token = os.getenv("TELEGRAM_BOT_TOKEN")
-bot = Bot(token, parse_mode=ParseMode.HTML)
+bot = get_bot()
 
 
 async def send_message_to_user(chat_id: int, text: str, disable_notification: bool = False) -> bool:
