@@ -8,9 +8,9 @@ from mood_mate_src.database_tools.schema import User, Language, default_reminder
 from mood_mate_src.database_tools.users import get_all_users_from_db
 from mood_mate_src.messaging.send import send_message_to_user
 from mood_mate_src.mate_logger import logger
-from mood_mate_src.messaging.states_text import reminder_notification_text
-from mood_mate_src.bot import bot
-
+from mood_mate_src.messaging.states_text import reminder_notification_text, get_state_msg
+from mood_mate_src.database_tools.mood_data import MoodRecord, MoodData
+from mood_mate_src.analytics.user_analytics import get_user_report_for_past_time_with_open_ai
 
 async def notification_routine():
     """
@@ -70,3 +70,43 @@ async def schedule_daily_task(task, hour=19, minute=0, name="notification_routin
         # Wait one day before scheduling again
         await asyncio.sleep(24 * 60 * 60)
 
+
+async def weekly_report():
+    """
+    Send weekly report to all users
+    """
+    users = get_all_users_from_db()
+    for user in users:
+        if user.settings.weekly_report_enabled:
+            response = get_user_report_for_past_time_with_open_ai(delta=60*60*24*10, user=user, role="Rick Sanchez")
+            if response is not None:
+                await send_message_to_user(user.chat_id, response)
+            else:
+                logger.info(f"No records for user {user.settings.username} in the last 10 days")
+                await send_message_to_user(user.chat_id, get_state_msg("lack_of_records_for_report", user))
+        else:
+            logger.info(f"User {user.settings.username} has disabled weekly report")
+
+async def weekly_report_routine():
+    """Runs the task every Sunday at 13:00."""
+    while True:
+        now = datetime.now()
+
+        # Calculate the next Sunday 13:00
+        next_run = now + timedelta(days=(6 - now.weekday()))  # Days until Sunday
+        next_run = next_run.replace(hour=13, minute=0, second=0, microsecond=0)
+
+        # If it's past 13:00 today, set the next run to next Sunday
+        if now > next_run:
+            next_run += timedelta(weeks=1)
+
+        # Calculate the delay in seconds
+        delay = (next_run - now).total_seconds()
+
+        logger.info(f"Next run of weekly report scheduled at {next_run} (in {delay} seconds)")
+
+        # Sleep until the next scheduled time
+        await asyncio.sleep(delay)
+
+        # Run the task
+        await weekly_report()

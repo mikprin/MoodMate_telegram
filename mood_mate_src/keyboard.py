@@ -24,6 +24,8 @@ BUTTONS_TEXT_LANG = {
     "get_csv": "Скачать мои данные как CSV",
     "get_plot": "Хочу график! 📈",
     "set_recommended_sleep": "Установить рекомендуемое время сна. 🛌",
+    "toggle_weekly_report_on": "Включить еженедельный отчёт",
+    "toggle_weekly_report_off": "Выключить еженедельный отчёт",
     },
     
     Language.ENG.value: {
@@ -43,6 +45,8 @@ BUTTONS_TEXT_LANG = {
     "get_csv": "Download my data as CSV",
     "get_plot": "I want a plot! 📈",
     "set_recommended_sleep": "Set recommended sleep time. 🛌",
+    "toggle_weekly_report_on": "Enable weekly report",
+    "toggle_weekly_report_off": "Disable weekly report",
     }
 }
 
@@ -126,7 +130,8 @@ def get_inline_settings_keyboard(user: User | None = None) -> InlineKeyboardBuil
             language = Language.ENG.value
         else:
             language = get_lang(user)
-        keyboard = types.InlineKeyboardMarkup(inline_keyboard=[
+            
+        inline_keyboard=[
             [
                 InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["change_language"],
                                     callback_data="change_language")
@@ -144,7 +149,22 @@ def get_inline_settings_keyboard(user: User | None = None) -> InlineKeyboardBuil
             #                          callback_data="main_menu"),
             # ]
         ]
-        )
+        if user is not None:
+            if user.settings.weekly_report_enabled:
+                inline_keyboard.append([
+                    InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["toggle_weekly_report_off"],
+                                        callback_data="toggle_weekly_report_off"),
+                ])
+            else:
+                inline_keyboard.append([
+                    InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["toggle_weekly_report_on"],
+                                        callback_data="toggle_weekly_report_on"),
+                ])
+                
+            
+        keyboard = types.InlineKeyboardMarkup(inline_keyboard)
+        
+        
         return keyboard
         
 

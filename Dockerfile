@@ -14,8 +14,9 @@ RUN apt-get update && apt-get install -y \
     apt-get clean
 # Copy the requirements.txt file to the container before copying the rest of the code
 COPY requirements.txt /requirements.txt
+COPY constraints.txt /constraints.txt
 
-RUN pip3 install -r requirements.txt
+RUN pip3 install -r requirements.txt -c constraints.txt
 
 COPY mood_mate_src /mood_mate_src
 

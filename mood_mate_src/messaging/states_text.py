@@ -28,7 +28,7 @@ mood_record_states_messages = {
         "lang_changed": "Язык изменен на русский",
         "toggle_reminder_off": "Напоминания теперь отключены.\nНапоминания можно включить обратно в настройках. Помни что напоминания помогают не забывать делать записи о настроении!",
         "toggle_reminder_on": "Напоминания теперь включены.\nЭто грамотное решение! Помни что напоминания помогают не забывать делать записи о настроении!",
-        "emoji_explained": "Выберите подходящую пиктограмму, которая наилучшим образом отражает ваше настроение. Если вдруг ошибся, нажми кнопку начать заново",
+        "emoji_explained": "Выберите подходящую пиктограмму, которая наилучшим образом отражает ваше настроение. Если вдруг ошибся, нажми правильную пиктограмму снова",
         "anxiety": "Какой у тебя уровень тревоги?",
         "energy": "Какой у тебя уровень энергии?",
         "future_in_years": "Насколько определенно ты видишь свое будущее? Укажи примерно в годах.",
@@ -40,6 +40,9 @@ mood_record_states_messages = {
         "not_enough_records": "У вас недостаточно записей для аналитики. Сделайте еще записей и попробуйте снова!",
         "recommended_sleep": "Сколько часов тебе рекомендуется спать в среднем? Введите число сообщением. Разделенное точкой если хочется не целое. Используй 0 чтобы установить None",
         "recommended_sleep_set": "Рекомендуемое время сна установлено",
+        "weekly_report_enabled_on": "Еженедельный отчет включен. Теперь каждую неделю вам будет приходить отчет о вашем настроении и эмоциях.",
+        "weekly_report_enabled_off": "Еженедельный отчет отключен. Теперь вам не будет приходить отчет о вашем настроении и эмоциях.",
+        "lack_of_records_for_report": "Вам бы сейчас пришел еженедельный отчет, но у вас недостаточно записей для аналитики. Сделайте еще записей и будет веселый отчет в следующий раз!",
     },
     
     Language.ENG.value: {
@@ -56,7 +59,7 @@ mood_record_states_messages = {
         "record_reminder": "Hello! I want to remind you to make a record of your mood! Press the button to start",
         "toggle_reminder_off": "Reminders are now disabled.\nYou can enable reminders back in the settings. Remember that reminders help you not to forget to make mood records!",
         "toggle_reminder_on": "Reminders are now enabled.\nThis is a smart decision! Remember that reminders help you not to forget to make mood records!",
-        "emoji_explained": "Select the appropriate emoji that best reflects your mood. If you made a mistake, press the start over button",
+        "emoji_explained": "Select the appropriate emoji that best reflects your mood. If you made a mistake, press the correct again.",
         "anxiety": "What is your level of anxiety?",
         "energy": "What is your level of energy?",
         "future_in_years": "How certain do you see your future? Specify approximately in years.",
@@ -68,6 +71,9 @@ mood_record_states_messages = {
         "not_enough_records": "You don't have enough records for analytics. Make more records and try again!",
         "recommended_sleep": "How many hours are you recommended to sleep on average? Enter a number separated by a dot if you want a non-integer. Use 0 to set it to None",
         "recommended_sleep_set": "The recommended sleep time is set",
+        "weekly_report_enabled_on": "Weekly report enabled. Now you will receive a report on your mood and emotions every week.",
+        "weekly_report_enabled_off": "Weekly report disabled. Now you will not receive a report on your mood and emotions.",
+        "lack_of_records_for_report": "You would have received a weekly report now, but you don't have enough records for analytics. Make more records and you will have a fun report next week!",
     },
     
 }
