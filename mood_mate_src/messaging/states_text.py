@@ -43,6 +43,8 @@ mood_record_states_messages = {
         "weekly_report_enabled_on": "Еженедельный отчет включен. Теперь каждую неделю вам будет приходить отчет о вашем настроении и эмоциях.",
         "weekly_report_enabled_off": "Еженедельный отчет отключен. Теперь вам не будет приходить отчет о вашем настроении и эмоциях.",
         "lack_of_records_for_report": "Вам бы сейчас пришел еженедельный отчет, но у вас недостаточно записей для аналитики. Сделайте еще записей и будет веселый отчет в следующий раз!",
+        "toggle_weekly_report_enabled_on": "Еженедельный отчет включен. Теперь каждую неделю вам будет приходить отчет о вашем настроении и эмоциях.",
+        "toggle_weekly_report_enabled_off": "Еженедельный отчет отключен. Теперь вам не будет приходить отчет о вашем настроении и эмоциях.",
     },
     
     Language.ENG.value: {
@@ -74,6 +76,8 @@ mood_record_states_messages = {
         "weekly_report_enabled_on": "Weekly report enabled. Now you will receive a report on your mood and emotions every week.",
         "weekly_report_enabled_off": "Weekly report disabled. Now you will not receive a report on your mood and emotions.",
         "lack_of_records_for_report": "You would have received a weekly report now, but you don't have enough records for analytics. Make more records and you will have a fun report next week!",
+        "toggle_weekly_report_enabled_on": "Weekly report enabled. Now you will receive a report on your mood and emotions every week.",
+        "toggle_weekly_report_enabled_off": "Weekly report disabled. Now you will not receive a report on your mood and emotions.",
     },
     
 }

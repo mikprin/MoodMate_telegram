@@ -126,46 +126,38 @@ def get_settings_keyboard(user: User | None = None):
 
 def get_inline_settings_keyboard(user: User | None = None) -> InlineKeyboardBuilder:
         
-        if user is None:
-            language = Language.ENG.value
+    if user is None:
+        language = Language.ENG.value
+    else:
+        language = get_lang(user)
+        
+    inline_keyboard=[
+        [
+            InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["change_language"],
+                                callback_data="change_language")
+        ],
+        [
+            InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["set_recommended_sleep"],
+                                callback_data="set_recommended_sleep"),
+        ],
+        [
+            InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["toggle_reminder"],
+                                callback_data="toggle_reminder"),
+        ],
+    ]
+    if user is not None:
+        if user.settings.weekly_report_enabled:
+            inline_keyboard.append([
+                InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["toggle_weekly_report_off"],
+                                    callback_data="toggle_weekly_report_off"),
+            ])
         else:
-            language = get_lang(user)
-            
-        inline_keyboard=[
-            [
-                InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["change_language"],
-                                    callback_data="change_language")
-            ],
-            [
-                InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["set_recommended_sleep"],
-                                    callback_data="set_recommended_sleep"),
-            ],
-            [
-                InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["toggle_reminder"],
-                                    callback_data="toggle_reminder"),
-            ],
-            # [
-            #     InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["go_back"],
-            #                          callback_data="main_menu"),
-            # ]
-        ]
-        if user is not None:
-            if user.settings.weekly_report_enabled:
-                inline_keyboard.append([
-                    InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["toggle_weekly_report_off"],
-                                        callback_data="toggle_weekly_report_off"),
-                ])
-            else:
-                inline_keyboard.append([
-                    InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["toggle_weekly_report_on"],
-                                        callback_data="toggle_weekly_report_on"),
-                ])
-                
-            
-        keyboard = types.InlineKeyboardMarkup(inline_keyboard)
-        
-        
-        return keyboard
+            inline_keyboard.append([
+                InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["toggle_weekly_report_on"],
+                                    callback_data="toggle_weekly_report_on"),
+            ])
+    keyboard = types.InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
+    return keyboard
         
 
 class EmojiSet():
