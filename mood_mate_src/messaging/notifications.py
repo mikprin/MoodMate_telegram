@@ -90,11 +90,11 @@ async def weekly_report():
 async def weekly_report_routine():
     """Runs the task every Sunday at 13:00."""
     while True:
-        now = datetime.now()
+        now = pendulum.now(tz="Asia/Yerevan")
 
         # Calculate the next Sunday 13:00
         next_run = now + timedelta(days=(6 - now.weekday()))  # Days until Sunday
-        next_run = next_run.replace(hour=13, minute=0, second=0, microsecond=0)
+        next_run = next_run.replace(hour=14, minute=0, second=0, microsecond=0)
 
         # If it's past 13:00 today, set the next run to next Sunday
         if now > next_run:

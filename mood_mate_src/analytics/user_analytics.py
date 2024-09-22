@@ -99,7 +99,8 @@ def get_user_report_for_past_time_with_open_ai(delta: int, user: User, role: str
     response = make_open_ai_request(prompt)
     
     # Add response disclamer:
-    
+    if response is None:
+        return None
     if user.settings.language == "ru":
         response += f"\n\nВаш скромный еженедельный отчет от {role} 📊. Не бери близко к сердцу, ведь я не настоящий, а вот ты да!"
     else:
