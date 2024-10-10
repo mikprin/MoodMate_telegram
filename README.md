@@ -18,12 +18,12 @@ Things to track:
 - Use of any doping (list)
 - Energy level (emoji)
 - Anxiety (emoji)
-- Period cycle (for women)
 - List could be extended
 
 
 User can ask for summary in the following ways:
 - Summary as plot for the last N days. Some items can be ticked off.
+- Weekly AI powered reports! Inspiaring you to start a new week!
 
 It would be nice to have a feature to set reminders for the user to check in with their mood at certain times of the day.
 
