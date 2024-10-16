@@ -80,7 +80,11 @@ async def weekly_report():
         if user.settings.weekly_report_enabled:
             response = get_user_report_for_past_time_with_open_ai(delta=60*60*24*10, user=user, role="Rick Sanchez")
             if response is not None:
-                await send_message_to_user(user.chat_id, response)
+                if type(response) == dict and 'error' in response:
+                    logger.error(f"Error in weekly report for user {user.settings.username}: {response['error']}")
+                    # await send_message_to_user(user.chat_id, response['error'])
+                else:
+                    await send_message_to_user(user.chat_id, response)
             else:
                 logger.info(f"No records for user {user.settings.username} in the last 10 days")
                 await send_message_to_user(user.chat_id, get_state_msg("lack_of_records_for_report", user))

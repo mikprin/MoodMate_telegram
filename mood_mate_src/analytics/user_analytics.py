@@ -1,5 +1,7 @@
 import pandas as pd
-from openai import OpenAI
+import requests
+import os
+# from openai import OpenAI
 from mood_mate_src.database_tools.users import get_all_users_from_db, User, get_user_from_db
 from mood_mate_src.database_tools.mood_data import get_all_records_for_past_time, get_user_records_for_past_time
 from mood_mate_src.analytics.convert import convert_records_to_pandas
@@ -65,45 +67,88 @@ def get_user_report_for_past_time(delta: int, user: User, role: str = "Rick Sanc
     return prompt
 
 
-def make_open_ai_request(prompt: str, system_role = "You are a helpful assistant.") -> str:
+def make_open_ai_request_routed(messages: list[dict], model_name="gpt-4o-mini") -> dict:
     """
-    Make a request to OpenAI API
-    """
-    client = OpenAI()
+    Sends a request to the FastAPI OpenAI service. Via Router.
 
-    if prompt is None or len(prompt) == 0:
-        logger.error("make_open_ai_request: prompt is empty")
-        return None
+    :param api_url: The URL of the FastAPI service (e.g., http://localhost:8000/api/open_ai_request).
+    :param model_name: The name of the OpenAI model (e.g., "gpt-4").
+    :param messages: A list of message dictionaries with "role" and "content" (e.g., [{"role": "user", "content": "Hello"}]).
+    :param auth_token: The authorization token required for the API.
+
+    :return: The response from the OpenAI service.
+    """
     
+    auth_token = os.getenv("OPENAI_RELAY_KEY", "")
+    api_url = os.getenv("RELAY_API_URL", "localhost:8000/api/open_ai_request")
+    
+    headers = {
+        "Authorization": auth_token,
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "model_name": model_name,
+        "messages": messages
+    }
+
     try:
-        completion = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": system_role},
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ]
-        )
-        return completion.choices[0].message.content
-    except Exception as e:
-        logger.error(f"OpenAI request failed: {e}")
-        return None
+        response = requests.post(api_url, json=payload, headers=headers)
+        response.raise_for_status()  # Raise an exception for 4xx/5xx errors
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        return {"error": str(e)}
+
+
+
+# def make_open_ai_request(messages: list[dict], system_role = "You are a helpful assistant.") -> str:
+#     """
+#     Make a request to OpenAI API
+#     """
+#     client = OpenAI()
+
+#     if messages is None or len(messages) == 0:
+#         logger.error("make_open_ai_request: prompt is empty")
+#         return None
+    
+#     try:
+#         completion = client.chat.completions.create(
+#             model="gpt-4o-mini",
+#             messages=messages
+#         )
+#         return completion.choices[0].message.content
+#     except Exception as e:
+#         logger.error(f"OpenAI request failed: {e}")
+#         return None
+
+
+def get_simple_messages_from_role(prompt: str, model_role: str = "Rick Sanchez") -> list[dict]:
+    messages = [
+        {"role": "system", "content": f"You are {model_role}."},
+        {"role": "user", "content": prompt}
+    ]
+    return messages
 
 def get_user_report_for_past_time_with_open_ai(delta: int, user: User, role: str = "Rick Sanchez") -> str:
     """
     Get prompt for creating a report for the last delta seconds
     """
     prompt = get_user_report_for_past_time(delta, user, role)
-    response = make_open_ai_request(prompt)
+    messages = get_simple_messages_from_role(prompt, model_role = "a helpful assistant")
+    response = make_open_ai_request_routed(messages=messages)
     
     # Add response disclamer:
-    if response is None:
+    if ("error" in response):
+        logger.error(f"OpenAI request failed: {response['error']}")
+        return response
+    if 'response' in response:
+        resp_text = response['response']
+    else:
+        logger.error(f"OpenAI response does not contain 'response' key")
         return None
     if user.settings.language == "ru":
-        response += f"\n\nВаш скромный еженедельный отчет от {role} 📊. Не бери близко к сердцу, ведь я не настоящий, а вот ты да!"
+        resp_text += f"\n\nВаш скромный еженедельный отчет от {role} 📊. Не бери близко к сердцу, ведь я не настоящий, а вот ты да!"
     else:
-        response += f"\n\nYour humble weekly report from {role} 📊. Don't take it to heart, because I'm not real, but you are!"
+        resp_text += f"\n\nYour humble weekly report from {role} 📊. Don't take it to heart, because I'm not real, but you are!"
     
-    return response
+    return resp_text
