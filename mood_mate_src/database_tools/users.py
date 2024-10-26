@@ -29,7 +29,6 @@ USERS_DB_TABLE = "users"
 default_dopings_list = {
     Language.ENG.value: [
                         "Coffee/caffeine: ☕",
-                        "Sugar 🍬",
                         "Smoking: 🚬",
                         "Alcohol: 🍺 or 🍷",
                         "Weed: 🌿",
@@ -41,7 +40,6 @@ default_dopings_list = {
                         ],
     Language.RU.value: [
                         "Кофе/кофеин: ☕",
-                        "Сахар 🍬",
                         "Курение: 🚬",
                         "Алкоголь: 🍺 или 🍷",
                         "Трава: 🌿",
