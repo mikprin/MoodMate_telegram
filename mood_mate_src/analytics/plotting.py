@@ -96,23 +96,27 @@ temporary_images_map = {
                         "Coffee/caffeine: ☕" : 'coffe.png',
                         "Coffee ☕" : 'coffe.png',
                         "Sugar 🍬" : 'sweets.png',
+                        "Sugar: 🍬" : 'sweets.png',
                         "Smoking: 🚬" : 'smoking.png',
                         "Alcohol: 🍺 or 🍷" : 'alcohol.png',
                         "Weed: 🌿" : 'weed.png',
                         "Mushrooms: 🍄" : 'mushrooms.png',
                         # "LSD: 🌈" : 'lsd.png',
                         "Pills?: 💊" : 'pills.png',
+                        "Vitamins/Supplements: 🍊" : 'vitamins.png'
     },
     Language.RU.value: {
                         "Кофе/кофеин: ☕" : 'coffe.png',
                         "Кофе ☕" : 'coffe.png',
                         "Сахар 🍬" : 'sweets.png',
+                        "Сахар: 🍬" : 'sweets.png',
                         "Курение: 🚬" : 'smoking.png',
                         "Алкоголь: 🍺 или 🍷" : 'alcohol.png',
                         "Трава: 🌿" : 'weed.png',
                         "Грибы: 🍄" : 'mushrooms.png',
                         # "ЛСД: 🌈" : 'lsd.png',
                         "Таблетки?: 💊" : 'pills.png',
+                        "Витамины/БАД: 🍊" : 'vitamins.png'
     }
 }
 
