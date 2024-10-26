@@ -1,3 +1,4 @@
+# settings and other routers
 from aiogram import Router, F
 from aiogram import types
 from aiogram.filters import Command
@@ -13,14 +14,15 @@ from mood_mate_src.database_tools.users import (
     process_user_db,
     update_user_in_db,
     process_user_from_id,
-    Language,
 )
+from mood_mate_src.database_tools.schema import DEFAULT_ASSISTANT_ROLE, Language
 from mood_mate_src.filters import ButtonTextFilter, CallbackDataFilter, validate_number_input
 from mood_mate_src.keyboard import (
     get_all_buttons_text,
     get_inline_settings_keyboard,
     get_settings_keyboard,
     get_start_keyboard,
+    get_button_text,
 )
 
 
@@ -29,8 +31,10 @@ from mood_mate_src.database_tools.users import get_all_users_from_db, User
 from mood_mate_src.analytics.user_analytics import get_user_statistics_text
 
 from mood_mate_src.messaging.send import send_message_to_user
-
 from mood_mate_src.messaging.notifications import weekly_report
+from mood_mate_src.analytics.assistants import PREDEFINED_ASSITANT_ROLES, create_short_assistant_name
+from mood_mate_src.mate_logger import logger
+from mood_mate_src.database_tools.schema import AssistantRole
 
 router = Router()
 
@@ -114,7 +118,89 @@ async def set_recommended_sleep_handler(message: Message, state: FSMContext):
     user.settings.recommended_sleep = float(message.text)
     await update_user_in_db(user)
     await state.clear()
-    await message.answer(get_state_msg("recommended_sleep_set", user), reply_markup=get_start_keyboard(user=user))   
+    await message.answer(get_state_msg("recommended_sleep_set", user), reply_markup=get_start_keyboard(user=user))
+
+
+@router.callback_query(CallbackDataFilter("set_assistant_role"))
+async def set_assistant_role_callback_handler(query: types.CallbackQuery, state: FSMContext):
+    """Send user to select a predefined role, enter a custom role, or keep the current role."""
+    user = await process_user_from_id(query.from_user.id)
+    keyboard = list()
+
+    # Add buttons for each predefined role
+    for role in PREDEFINED_ASSITANT_ROLES:
+        keyboard.append([types.InlineKeyboardButton(text=role.role_name, callback_data=f"select_role_{role.role_name_short}")])
+
+    # Add a button for custom role input
+    keyboard.append([types.InlineKeyboardButton(text=get_button_text("enter_custom_role", user=user),
+                                                callback_data="enter_custom_role")])
+
+    # Add a button to keep the current role
+    keyboard.append([types.InlineKeyboardButton(text=get_button_text("keep_current_role", user=user),
+                                                callback_data="keep_current_role")])
+
+    inline_keyboard = types.InlineKeyboardMarkup(inline_keyboard=keyboard)
+    
+    current_role = user.settings.assistant_custom_role
+    text = get_state_msg("choose_assistant_role", user)
+    if current_role is not None:
+        text = text.format(current_role.role_name)
+    await state.set_state(SettingsStates.assistant_role)
+    await query.answer()
+    await query.message.edit_text(text, reply_markup=inline_keyboard)
+
+@router.callback_query(CallbackDataFilter("keep_current_role"))
+async def keep_current_role_callback_handler(query: types.CallbackQuery, state: FSMContext):
+    """Handle keeping the current assistant role."""
+    user = await process_user_from_id(query.from_user.id)
+    await state.clear()
+    await query.answer()
+    
+    if user.settings.assistant_custom_role is None:
+        role_name = DEFAULT_ASSISTANT_ROLE.role_name
+    else:
+        role_name = user.settings.assistant_custom_role.role_name    
+    await query.message.edit_text(get_state_msg("role_unchanged", user).format(role_name))
+
+@router.callback_query(CallbackDataFilter("select_role_"))
+async def select_predefined_role_callback_handler(query: types.CallbackQuery, state: FSMContext):
+    """Handle selection of predefined assistant role."""
+    user = await process_user_from_id(query.from_user.id)
+    selected_role_short = query.data.replace("select_role_", "")
+    selected_role = next((role for role in PREDEFINED_ASSITANT_ROLES if role.role_name_short == selected_role_short), None)
+    if selected_role:
+        user.settings.assistant_custom_role = selected_role
+        await update_user_in_db(user)
+        await state.clear()
+        await query.answer()
+        await query.message.edit_text(get_state_msg("role_set", user).format(selected_role.role_name))
+
+@router.callback_query(CallbackDataFilter("enter_custom_role"))
+async def enter_custom_role_callback_handler(query: types.CallbackQuery, state: FSMContext):
+    """Prompt user to enter a custom role."""
+    user = await process_user_from_id(query.from_user.id)
+    await state.set_state(SettingsStates.enter_custom_role)
+    await query.answer()
+    await query.message.edit_text(get_state_msg("enter_custom_role_prompt", user))
+
+@router.message(SettingsStates.enter_custom_role)
+async def enter_custom_role_handler(message: Message, state: FSMContext):
+    """Handle custom role input from the user."""
+    user = await process_user_db(message)
+    custom_role_name = message.text.strip()
+
+    if not custom_role_name:
+        await message.answer(get_state_msg("invalid_custom_role", user))
+        return
+
+    custom_role = AssistantRole(role_name_short=create_short_assistant_name(custom_role_name), role_name=custom_role_name)
+    user.settings.assistant_custom_role = custom_role
+
+    await update_user_in_db(user)
+    await state.clear()
+    await message.answer(get_state_msg("role_set", user).format(custom_role.role_name), reply_markup=get_start_keyboard(user=user))
+ 
+# Admin routers
 @router.message(Command("get_stats"), AdminFilter())
 async def get_stats(message: types.Message) -> None:
     stats = get_user_statistics_text()

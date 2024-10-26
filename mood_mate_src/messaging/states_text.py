@@ -1,18 +1,13 @@
 from mood_mate_src.database_tools.users import Language, User
-from mood_mate_src.keyboard import BUTTONS_TEXT_LANG
-
+from mood_mate_src.keyboard import BUTTONS_TEXT_LANG, get_button_text
+from mood_mate_src.messaging.lang_support import get_msg_from_dict
 
 
 def get_state_msg(state_name: str, user: User) -> str:
     """
     Get the message for the state by its name and language
     """
-    
-    try:
-        msg = mood_record_states_messages[user.settings.language][state_name]
-    except KeyError:
-        return f"Message for state {state_name} not found in the language {user.settings.language}"
-    return msg
+    return get_msg_from_dict(mood_record_states_messages, user, state_name)
 
 mood_record_states_messages = {
     Language.RU.value: {
@@ -45,6 +40,11 @@ mood_record_states_messages = {
         "lack_of_records_for_report": "Вам бы сейчас пришел еженедельный отчет, но у вас недостаточно записей для аналитики. Сделайте еще записей и будет веселый отчет в следующий раз!",
         "toggle_weekly_report_enabled_on": "Еженедельный отчет включен. Теперь каждую неделю вам будет приходить отчет о вашем настроении и эмоциях.",
         "toggle_weekly_report_enabled_off": "Еженедельный отчет отключен. Теперь вам не будет приходить отчет о вашем настроении и эмоциях.",
+        "choose_assistant_role": "Текущая роль ассистента: {}. Если хотите его сменить, пожалуйста, выбери роль ассистента из предложенных или нажми 'Ввести свою роль'.",
+        "enter_custom_role_prompt": "Пожалуйста, введи свою роль для ассистента.",
+        "invalid_custom_role": "Введено некорректное название роли. Попробуйте снова.",
+        "role_set": "Роль {} установлена как ваша роль ассистента.",
+        "role_unchanged": "Роль ассистента не изменена. Текущая роль: {}",
     },
     
     Language.ENG.value: {
@@ -78,6 +78,11 @@ mood_record_states_messages = {
         "lack_of_records_for_report": "You would have received a weekly report now, but you don't have enough records for analytics. Make more records and you will have a fun report next week!",
         "toggle_weekly_report_enabled_on": "Weekly report enabled. Now you will receive a report on your mood and emotions every week.",
         "toggle_weekly_report_enabled_off": "Weekly report disabled. Now you will not receive a report on your mood and emotions.",
+        "choose_assistant_role": "Current assistant role: {}. If you want to change it, please select an assistant role from the list or press 'Enter your role'.",
+        "enter_custom_role_prompt": "Please enter your role for the assistant.",
+        "invalid_custom_role": "Invalid role name entered. Try again.",
+        "role_set": "The role {} is set as your assistant role.",
+        "role_unchanged": "The assistant role has not been changed. Current role: {}",
     },
     
 }

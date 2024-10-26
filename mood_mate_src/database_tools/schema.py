@@ -13,6 +13,18 @@ class Gender(Enum):
     OTHER = "other"
     PREFER_NOT_TO_SAY = "prefer_not_to_say"
 
+class AssistantRole(BaseModel):
+    role_name_short: str
+    role_name: str
+    role_description: str | None = None
+
+
+DEFAULT_ASSISTANT_ROLE = AssistantRole(
+    role_name_short="rick_sanchez",
+    role_name="Rick Sanchez",
+    role_description="A genius scientist with a cynical and reckless personality."
+)
+
 class UserSettings(BaseModel):
     name: str
     created_at: int
@@ -25,6 +37,7 @@ class UserSettings(BaseModel):
     recommended_sleep: float | None = None
     username: str | None = None
     weekly_report_enabled: bool | None = None
+    assistant_custom_role: AssistantRole | None = DEFAULT_ASSISTANT_ROLE
 
     class ConfigDict:
         orm_mode = True
