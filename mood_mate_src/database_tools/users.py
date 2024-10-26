@@ -16,6 +16,7 @@ from mood_mate_src.database_tools.schema import (
     Language,
     Doping,
 )
+from mood_mate_src.analytics.assistants import DEFAULT_ASSISTANT_ROLE
 
 USERS_DB_TABLE = "users"
 
@@ -72,6 +73,7 @@ def create_user_from_telegram_message(message: Message) -> User:
             language=language.value,
             recommended_sleep=8,
             weekly_report_enabled=True,
+            assistant_custom_role=DEFAULT_ASSISTANT_ROLE
         )
     )
 

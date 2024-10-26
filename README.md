@@ -24,9 +24,9 @@ Things to track:
 User can ask for summary in the following ways:
 - Summary as plot for the last N days. Some items can be ticked off.
 - Weekly AI powered reports! Inspiaring you to start a new week!
+- AI suggestions to improve mood and life quality.
 
-It would be nice to have a feature to set reminders for the user to check in with their mood at certain times of the day.
-
+Reminders are implemented to remind the user to track their mood and emotions on a daily basis.
 
 ### Ideas for the future
 It would be nice to have an advice or cheers up message based on the mood of the user and probably using some ML model.

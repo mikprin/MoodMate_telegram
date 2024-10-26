@@ -4,7 +4,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram import types
 import emoji
 from mood_mate_src.database_tools.users import Language, User
-
+from mood_mate_src.messaging.lang_support import get_msg_from_dict
 
 BUTTONS_TEXT_LANG = {
     Language.RU.value: {
@@ -12,7 +12,7 @@ BUTTONS_TEXT_LANG = {
     "settings": "⚙️",
     "track_mood": "Записать настроение",
     "help": "Помощь",
-    "change_language": "🌐",
+    "change_language": "🌐, Eng/Ru",
     "toggle_reminder": "Напоминания от бота",
     "mood_data": "Аналитика настроения",
     "pick_emoji": "Выберите пиктограмму",
@@ -26,6 +26,9 @@ BUTTONS_TEXT_LANG = {
     "set_recommended_sleep": "Установить рекомендуемое время сна. 🛌",
     "toggle_weekly_report_on": "Включить еженедельный отчёт",
     "toggle_weekly_report_off": "Выключить еженедельный отчёт",
+    "set_assistant_role": "Роль ассистента",
+    "keep_current_role": "Оставить текущую роль",
+    "enter_custom_role": "Введите свою роль",
     },
     
     Language.ENG.value: {
@@ -33,7 +36,7 @@ BUTTONS_TEXT_LANG = {
     "settings": "⚙️",
     "track_mood": "Track mood",
     "help": "Help",
-    "change_language": "🌐",
+    "change_language": "🌐, Eng/Ru",
     "toggle_reminder": "Toggle bot reminders",
     "mood_data": "Mood analytics",
     "pick_emoji": "Pick an emoji",
@@ -47,8 +50,16 @@ BUTTONS_TEXT_LANG = {
     "set_recommended_sleep": "Set recommended sleep time. 🛌",
     "toggle_weekly_report_on": "Enable weekly report",
     "toggle_weekly_report_off": "Disable weekly report",
+    "set_assistant_role": "Your assistant role",
+    "keep_current_role": "Keep current role",
+    "enter_custom_role": "Enter custom role",
     }
 }
+
+
+def get_button_text(button_text: str, user: User) -> str:
+    """Like for the get_msg_from_dict function, but for buttons."""
+    return get_msg_from_dict(BUTTONS_TEXT_LANG, user, button_text)
 
 def get_all_buttons_text(button_text: str) -> list[str]:
     langs = [lang.value for lang in Language]
@@ -144,6 +155,10 @@ def get_inline_settings_keyboard(user: User | None = None) -> InlineKeyboardBuil
             InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["toggle_reminder"],
                                 callback_data="toggle_reminder"),
         ],
+        [
+            InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["set_assistant_role"],
+                                 callback_data="set_assistant_role"),
+        ]
     ]
     if user is not None:
         if user.settings.weekly_report_enabled:
