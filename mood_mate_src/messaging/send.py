@@ -13,7 +13,16 @@ from mood_mate_src.aiogram_utils.bot import get_bot
 bot = get_bot()
 
 
-async def send_message_to_user(chat_id: int, text: str, disable_notification: bool = False) -> bool:
+async def send_message_to_user(chat_id: int,
+                               text: str,
+                               disable_notification: bool = False,
+                               username: str | None = None) -> bool:
+    
+    if username is None:
+        username_str = ""
+    else:
+        username_str = f" Username: @{username}"
+    
     try:
         await bot.send_message(chat_id, text, disable_notification=disable_notification)
     # except exceptions.BotBlocked:
@@ -27,26 +36,25 @@ async def send_message_to_user(chat_id: int, text: str, disable_notification: bo
     # except exceptions.UserDeactivated:
     #     logger.error(f"Target [ID:{user_id}]: user is deactivated")
     except exceptions.TelegramForbiddenError:
-        logger.exception(f"Target [ID:{chat_id}]: forbidden")
+        logger.warning(f"Target [ID:{chat_id}]: forbidden.{username_str}")
     except exceptions.TelegramRetryAfter as e:
-        logger.exception(f"Target [ID:{chat_id}]: retry after")
+        logger.warning(f"Target [ID:{chat_id}]: retry after")
         asyncio.sleep(e.timeout)
         return await send_message_to_user(chat_id, text)
     except exceptions.TelegramBadRequest:
-        logger.exception(f"Target [ID:{chat_id}]: bad request")
-        await bot.session.close()
+        logger.warning(f"Target [ID:{chat_id}]: bad request")
     except exceptions.TelegramAPIError:
-        logger.exception(f"Target [ID:{chat_id}]: failed")
+        logger.warning(f"Target [ID:{chat_id}]: failed.{username_str}")
     except exceptions.AiogramError:
-        logger.exception(f"Target [ID:{chat_id}]: failed. Aiogram error")
-
+        logger.warning(f"Target [ID:{chat_id}]: failed. Aiogram error.")
 
     except Exception as e:
         logger.exception(f"Target [ID:{chat_id}]: failed with exception {e}")
     else:
-        logger.info(f"Send message: Target [ID:{chat_id}]: success")
+        logger.info(f"Send message: Target [ID:{chat_id}]: success.{username_str}")
         await bot.session.close()
         return True
+    await bot.session.close()
     return False
 
 async def send_file_to_user(chat_id: int, file: str, caption: str = None, disable_notification: bool = False) -> bool:
