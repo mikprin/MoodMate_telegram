@@ -1,11 +1,12 @@
 # Moved here all the routes related to the mood survey
 import os
+import re
 import tempfile
+from datetime import timedelta
 from aiogram import Router, F
 from aiogram import types
 from aiogram.types import InlineKeyboardButton, Message, BufferedInputFile, FSInputFile
 from aiogram.fsm.context import FSMContext
-from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from mood_mate_src.messaging.states_text import get_state_msg
 from mood_mate_src.filters import ButtonTextFilter, CallbackDataFilter
@@ -50,7 +51,19 @@ async def track_mood_handler(message: Message, state: FSMContext):
             [
                 InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["get_plot"],
                                      callback_data="get_plot_all"),
-            ]
+            ],
+            [
+                InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["get_plot_7_days"],
+                                     callback_data="get_plot_7_days"),
+            ],
+            [
+                InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["get_plot_30_days"],
+                                     callback_data="get_plot_30_days"),
+            ],
+            [
+                InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["get_plot_60_days"],
+                                     callback_data="get_plot_60_days"),
+            ],
             # [
             #     InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["toggle_reminder"],
             #                         callback_data="toggle_reminder"),
@@ -78,15 +91,14 @@ async def get_csv_handler(call: types.CallbackQuery):
         # Remove the file
         os.remove(csv_path)
         logger.info(f"CSV file sent to user {user.settings.username}")
-        
 
-@router.callback_query(CallbackDataFilter("get_plot_all"))
-async def get_plot_all_handler(call: types.CallbackQuery):
-    """Get the plot with the mood records"""
+
+async def send_plot_for_period(call: types.CallbackQuery, time_period: int | None = None):
+    """Helper function to send a plot for a specific time period"""
     user = await process_user_from_id(call.from_user.id)
     logger.info(f"User {user.settings.username} requested the plot")
     # Get the CSV file
-    df = get_user_pandas_df(user.user_id)
+    df = get_user_pandas_df(user.user_id, time_period)
     
     if df.shape[0] < 2:
         await call.answer()
@@ -102,3 +114,15 @@ async def get_plot_all_handler(call: types.CallbackQuery):
             # Remove the file
             os.remove(plot_path)
             logger.info(f"Plot sent to user {user.settings.username}")
+
+
+@router.callback_query(CallbackDataFilter("get_plot_"))
+async def get_plot_handler(call: types.CallbackQuery):
+    match = re.match(r"get_plot_(\d+|all)", call.data)
+    if match:
+        period_str = match.group(1)
+        if period_str == "all":
+            time_period = None
+        else:
+            time_period = timedelta(days=int(period_str)).total_seconds()
+        await send_plot_for_period(call, time_period)

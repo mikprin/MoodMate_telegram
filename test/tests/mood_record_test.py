@@ -1,5 +1,5 @@
 from mood_mate_src.database_tools.mood_data import MoodRecord, MoodData
-
+from mood_mate_src.analytics.convert import convert_records_to_pandas
 
 def test_create_record():
     
@@ -10,3 +10,8 @@ def test_create_record():
     assert record.date == "2022-01-01"
     assert record.created_at == 1640995200
     assert record.data == data
+    
+def test_empty_records_to_pandas():
+    
+    result = convert_records_to_pandas([])
+    

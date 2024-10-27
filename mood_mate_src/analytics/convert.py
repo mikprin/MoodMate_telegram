@@ -1,8 +1,13 @@
 import pandas as pd
-from mood_mate_src.database_tools.mood_data import MoodRecord, MoodData, get_mood_records_from_db
+from mood_mate_src.database_tools.mood_data import (MoodRecord,
+                                                    MoodData,
+                                                    get_mood_records_from_db,
+                                                    get_user_records_for_past_time)
+
 
 def flatten_record(record: MoodRecord) -> dict:
-    """Output a dictionary with all the data from a MoodRecord object flattened into a single dictionary."""
+    """Output a dictionary with all the data from a MoodRecord object flattened into a single dictionary.
+    Separating MoodData field from other fields."""
     record_dict = record.model_dump()
     # Flatten data into record_dict
     return_dict = dict()
@@ -19,7 +24,11 @@ def convert_records_to_pandas(records: list[MoodRecord]) -> pd.DataFrame:
     return pd.DataFrame(flatten_records)
 
 
-def get_user_pandas_df(user_id: int) -> pd.DataFrame:
-    """Get a pandas DataFrame with all the mood records for a given user_id."""
-    records = get_mood_records_from_db(user_id)
+def get_user_pandas_df(user_id: int, time_period: int | None = None ) -> pd.DataFrame:
+    """Get a pandas DataFrame with all the mood records for a given user_id.
+    Don't forget to check it it's empty or not!"""
+    if time_period is not None:
+        records = get_user_records_for_past_time(user_id, time_period)
+    else:
+        records = get_mood_records_from_db(user_id)
     return convert_records_to_pandas(records)
