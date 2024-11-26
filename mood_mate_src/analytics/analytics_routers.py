@@ -1,19 +1,16 @@
-# Moved here all the routes related to the mood survey
+# Moved here all the routes related to the analytics of the user's mood records
 import os
 import re
 import tempfile
 from datetime import timedelta
-from aiogram import Router, F
+from aiogram import Router
 from aiogram import types
-from aiogram.types import InlineKeyboardButton, Message, BufferedInputFile, FSInputFile
+from aiogram.types import InlineKeyboardButton, Message, FSInputFile
 from aiogram.fsm.context import FSMContext
 
 from mood_mate_src.messaging.states_text import get_state_msg
 from mood_mate_src.filters import ButtonTextFilter, CallbackDataFilter
 from mood_mate_src.database_tools.users import (
-    User,
-    UserSettings,
-    Language,
     process_user_db,
     process_user_from_id
 )
@@ -26,7 +23,6 @@ from mood_mate_src.keyboard import (
 )
 from mood_mate_src.mate_logger import logger
 from mood_mate_src.analytics.convert import get_user_pandas_df
-from mood_mate_src.messaging.send import send_file_to_user
 from mood_mate_src.analytics.plotting import get_plot_from_df
 
 router = Router()

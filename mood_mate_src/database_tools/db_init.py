@@ -1,8 +1,10 @@
 import sqlite3
 
 from mood_mate_src.database_tools.locks import user_db_lock
-from mood_mate_src.database_tools.query import execute_query_with_lock, DB_PATH
-from mood_mate_src.database_tools.users import USERS_DB_TABLE
+from mood_mate_src.database_tools.query import (execute_query_with_lock,
+                                                DB_PATH,
+                                                execute_query)
+from mood_mate_src.database_tools.users import USERS_DB_TABLE, USERS_FEEDBACK_DB_TABLE
 from mood_mate_src.database_tools.mood_data import DATA_TABLE
 from mood_mate_src.mate_logger import logger
 
@@ -36,6 +38,30 @@ def init_db():
     # Check if the DATA_TABLE table exists
     if not table_exists(DB_PATH, DATA_TABLE):
         init_data_db()
+
+    if not table_exists(DB_PATH, USERS_FEEDBACK_DB_TABLE):
+        create_table(DB_PATH,
+                     USERS_FEEDBACK_DB_TABLE,
+                     """id INTEGER PRIMARY KEY,
+                     user_id INTEGER NOT NULL,
+                     feedback TEXT NOT NULL,
+                     created_at INTEGER NOT NULL""")
+
+def create_table(db_path, table_name, table_schema):
+    """
+    Create a table in the SQLite database.
+
+    :param db_path: Path to the SQLite database file.
+    :param table_name: Name of the table to create.
+    :param table_schema: SQL schema for the table.
+    """
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute(f"""CREATE TABLE {table_name}
+                    ({table_schema})""")
+    conn.commit()
+    conn.close()
+    logger.info(f"Table {table_name} created in the database {db_path}")
 
 def init_user_db():
     conn = sqlite3.connect(DB_PATH)

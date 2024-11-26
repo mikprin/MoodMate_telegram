@@ -13,7 +13,7 @@ from mood_mate_src.aiogram_utils.bot import get_bot
 bot = get_bot()
 
 
-async def send_message_to_user(chat_id: int,
+async def send_message_to_chat_id(chat_id: int,
                                text: str,
                                disable_notification: bool = False,
                                username: str | None = None) -> bool:
@@ -32,7 +32,7 @@ async def send_message_to_user(chat_id: int,
     # except exceptions.RetryAfter as e:
     #     logger.error(f"Target [ID:{user_id}]: Flood limit is exceeded. Sleep {e.timeout} seconds.")
     #     await asyncio.sleep(e.timeout)
-    #     return await send_message_to_user(user_id, text)  # Recursive call
+    #     return await send_message_to_chat_id(user_id, text)  # Recursive call
     # except exceptions.UserDeactivated:
     #     logger.error(f"Target [ID:{user_id}]: user is deactivated")
     except exceptions.TelegramForbiddenError:
@@ -40,7 +40,7 @@ async def send_message_to_user(chat_id: int,
     except exceptions.TelegramRetryAfter as e:
         logger.warning(f"Target [ID:{chat_id}]: retry after")
         asyncio.sleep(e.timeout)
-        return await send_message_to_user(chat_id, text)
+        return await send_message_to_chat_id(chat_id, text)
     except exceptions.TelegramBadRequest:
         logger.warning(f"Target [ID:{chat_id}]: bad request")
     except exceptions.TelegramAPIError:

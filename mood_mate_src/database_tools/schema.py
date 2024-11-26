@@ -66,3 +66,15 @@ class Doping(BaseModel):
     
     def get_name_by_lang(self, lang: str) -> str:
         return f"{self.names[lang]} {self.emoji}"
+
+
+class UserFeedbackRecord(BaseModel):
+    """Model to store user feedback"""
+    user_id: int
+    created_at: int
+    feedback: str
+
+    class ConfigDict:
+        orm_mode = True  # Enable ORM mode for easy conversion
+    def __str__(self):
+        return f"Feedback from user_id {self.user_id}: {self.feedback}"

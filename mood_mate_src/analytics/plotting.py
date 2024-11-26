@@ -103,7 +103,9 @@ temporary_images_map = {
                         "Mushrooms: 🍄" : 'mushrooms.png',
                         # "LSD: 🌈" : 'lsd.png',
                         "Pills?: 💊" : 'pills.png',
-                        "Vitamins/Supplements: 🍊" : 'vitamins.png'
+                        "Vitamins/Supplements: 🍊" : 'vitamins.png',
+                        "Zap: ⚡" : 'zap.png',
+                        "Gaming: 🎮": 'video_game.png',
     },
     Language.RU.value: {
                         "Кофе/кофеин: ☕" : 'coffe.png',
@@ -116,7 +118,9 @@ temporary_images_map = {
                         "Грибы: 🍄" : 'mushrooms.png',
                         # "ЛСД: 🌈" : 'lsd.png',
                         "Таблетки?: 💊" : 'pills.png',
-                        "Витамины/БАД: 🍊" : 'vitamins.png'
+                        "Витамины/БАД: 🍊" : 'vitamins.png',
+                        "Зап: ⚡" : 'zap.png',
+                        "Игры: 🎮" : 'video_game.png',
     }
 }
 
