@@ -20,7 +20,7 @@ from mood_mate_src.analytics.assistants import DEFAULT_ASSISTANT_ROLE
 
 USERS_DB_TABLE = "users"
 
-
+USERS_FEEDBACK_DB_TABLE = "users_feedback"
 
 # default_dopings = [
 
@@ -36,7 +36,9 @@ default_dopings_list = {
                         "🌈",
                         "Pills?: 💊",
                         "Sugar: 🍬",
-                        "Vitamins/Supplements: 🍊"
+                        "Vitamins/Supplements: 🍊",
+                        "Zap: ⚡",
+                        "Gaming: 🎮",
                         ],
     Language.RU.value: [
                         "Кофе/кофеин: ☕",
@@ -47,7 +49,9 @@ default_dopings_list = {
                         "🌈",
                         "Таблетки?: 💊",
                         "Сахар: 🍬",
-                        "Витамины/БАД: 🍊"
+                        "Витамины/БАД: 🍊",
+                        "Зап: ⚡",
+                        "Игры: 🎮",
                         ]
 }
 

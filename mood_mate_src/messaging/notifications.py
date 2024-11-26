@@ -6,7 +6,7 @@ import pendulum
 
 from mood_mate_src.database_tools.schema import User, Language, default_reminder_time
 from mood_mate_src.database_tools.users import get_all_users_from_db
-from mood_mate_src.messaging.send import send_message_to_user
+from mood_mate_src.messaging.send import send_message_to_chat_id
 from mood_mate_src.mate_logger import logger
 from mood_mate_src.messaging.states_text import reminder_notification_text, get_state_msg
 from mood_mate_src.database_tools.mood_data import MoodRecord, MoodData
@@ -32,7 +32,7 @@ async def notify_user(user: User):
     # Pick random message from the reminder_notification_text
     reminder_text = random.choice(reminder_notification_text[language])
     logger.info(f"Sending reminder to user {user.settings.username}: {reminder_text}")
-    await send_message_to_user(user.chat_id, reminder_text) 
+    await send_message_to_chat_id(user.chat_id, reminder_text) 
 
 async def notify_users():
     """
@@ -49,7 +49,7 @@ async def send_text_message_to_all_users(text):
     users = get_all_users_from_db()
     logger.info(f"Sending message to all users: {text}")
     for user in users:
-        await send_message_to_user(user.chat_id, text)
+        await send_message_to_chat_id(user.chat_id, text)
 
 async def schedule_daily_task(task, hour=19, minute=0, name="notification_routine"):
     while True:
@@ -82,12 +82,12 @@ async def weekly_report():
             if response is not None:
                 if 'error' in response:
                     logger.error(f"Error in weekly report for user {user.settings.username}: {response['error']}")
-                    # await send_message_to_user(user.chat_id, response['error'])
+                    # await send_message_to_chat_id(user.chat_id, response['error'])
                 else:
-                    await send_message_to_user(user.chat_id, response['response'])
+                    await send_message_to_chat_id(user.chat_id, response['response'])
             else:
                 logger.info(f"No records for user {user.settings.username} in the last 10 days")
-                await send_message_to_user(user.chat_id, get_state_msg("lack_of_records_for_report", user))
+                await send_message_to_chat_id(user.chat_id, get_state_msg("lack_of_records_for_report", user))
         else:
             logger.info(f"User {user.settings.username} has disabled weekly report")
 

@@ -8,7 +8,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from mood_mate_src.states_machine import AddRecord
-from mood_mate_src.messaging.send import send_message_to_user
+from mood_mate_src.messaging.send import send_message_to_chat_id
 from mood_mate_src.database_tools.users import (
     User,
     process_user_db,
@@ -295,7 +295,7 @@ async def no_note_callback_handler(query: types.CallbackQuery, state: FSMContext
     record_text = [f"{key}: {value}" for key, value in record.items()]
     record_text = "\n".join(record_text)
     if os.environ.get("DEBUG") == "True":
-        await send_message_to_user(user.chat_id, f"Your record:\n{record_text}")
+        await send_message_to_chat_id(user.chat_id, f"Your record:\n{record_text}")
     await query.answer()
     await query.message.answer(f"{get_state_msg('record_saved', user)}", reply_markup=get_start_keyboard(user=user))
 

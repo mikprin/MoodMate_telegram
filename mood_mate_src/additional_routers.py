@@ -8,7 +8,7 @@ from aiogram.fsm.context import FSMContext
 from mood_mate_src.filters import AdminFilter
 from mood_mate_src.database_tools.users import get_all_users_from_db, User
 from mood_mate_src.states_machine import SettingsStates
-from mood_mate_src.messaging.send import send_message_to_user
+from mood_mate_src.messaging.send import send_message_to_chat_id
 from mood_mate_src.messaging.states_text import get_state_msg
 from mood_mate_src.database_tools.users import (
     process_user_db,
@@ -30,7 +30,7 @@ from mood_mate_src.filters import AdminFilter
 from mood_mate_src.database_tools.users import get_all_users_from_db, User
 from mood_mate_src.analytics.user_analytics import get_user_statistics_text
 
-from mood_mate_src.messaging.send import send_message_to_user
+from mood_mate_src.messaging.send import send_message_to_chat_id
 from mood_mate_src.messaging.notifications import weekly_report
 from mood_mate_src.analytics.assistants import PREDEFINED_ASSITANT_ROLES, create_short_assistant_name
 from mood_mate_src.mate_logger import logger
@@ -52,7 +52,7 @@ async def send_message_to_users(message: types.Message) -> None:
     if len(text) == 0 or text.isspace():
         await message.answer("Please provide text to send.")
     for user in users:
-        await send_message_to_user(user.chat_id, text)
+        await send_message_to_chat_id(user.chat_id, text)
         
 @router.message(ButtonTextFilter(get_all_buttons_text("settings")))
 async def settings_handler(message: Message):
