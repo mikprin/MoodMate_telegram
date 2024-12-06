@@ -1,22 +1,27 @@
 # In this file I want to notify users periodically.
 import asyncio
-from datetime import datetime, timedelta
 import random
+from datetime import datetime, timedelta
+
 import pendulum
 
-from mood_mate_src.database_tools.schema import User, Language, default_reminder_time
+from mood_mate_src.ai_agent.ai_requests import \
+    get_user_report_for_past_time_with_open_ai
+from mood_mate_src.database_tools.mood_data import MoodData, MoodRecord
+from mood_mate_src.database_tools.schema import (Language, User,
+                                                 default_reminder_time)
 from mood_mate_src.database_tools.users import get_all_users_from_db
-from mood_mate_src.messaging.send import send_message_to_chat_id
 from mood_mate_src.mate_logger import logger
-from mood_mate_src.messaging.states_text import reminder_notification_text, get_state_msg
-from mood_mate_src.database_tools.mood_data import MoodRecord, MoodData
-from mood_mate_src.analytics.user_analytics import get_user_report_for_past_time_with_open_ai
+from mood_mate_src.messaging.send import send_message_to_chat_id
+from mood_mate_src.messaging.states_text import (get_state_msg,
+                                                 reminder_notification_text)
+
 
 async def notification_routine():
     """
     Periodically notify users about the mood record
     """
-    
+
     default_reminder_time_pendulum = pendulum.parse(default_reminder_time)
     await schedule_daily_task(notify_users, hour=default_reminder_time_pendulum.hour,
                               minute=default_reminder_time_pendulum.minute,
@@ -27,12 +32,12 @@ async def notify_user(user: User):
     """
     Notify the user about the mood record
     """
-    
+
     language = user.settings.language
     # Pick random message from the reminder_notification_text
     reminder_text = random.choice(reminder_notification_text[language])
     logger.info(f"Sending reminder to user {user.settings.username}: {reminder_text}")
-    await send_message_to_chat_id(user.chat_id, reminder_text) 
+    await send_message_to_chat_id(user.chat_id, reminder_text)
 
 async def notify_users():
     """
@@ -55,11 +60,11 @@ async def schedule_daily_task(task, hour=19, minute=0, name="notification_routin
     while True:
         now = pendulum.now(tz="Asia/Yerevan")
         target_time = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
-        
+
         # If the target time is in the past, move it to the next day
         if now > target_time:
             target_time = target_time.add(days=1)
-        
+
         time_to_wait = (target_time - now).total_seconds()
         logger.info(f"Running {name}. Next {name} run scheduled at: {target_time.to_datetime_string()} (in {time_to_wait} seconds) (in {time_to_wait/60/60} hours)")
 

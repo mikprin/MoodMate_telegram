@@ -1,22 +1,19 @@
 import json
 import os
 from dataclasses import dataclass
-from pydantic import BaseModel
 from datetime import datetime
 from enum import Enum
+
 from aiogram.types import Message
-from mood_mate_src.mate_logger import logger
+from pydantic import BaseModel
 
-from mood_mate_src.database_tools.locks import user_db_lock
-from mood_mate_src.database_tools.query import execute_query_with_lock, DB_PATH, execute_query
-
-from mood_mate_src.database_tools.schema import (
-    UserSettings,
-    User,
-    Language,
-    Doping,
-)
 from mood_mate_src.analytics.assistants import DEFAULT_ASSISTANT_ROLE
+from mood_mate_src.database_tools.locks import user_db_lock
+from mood_mate_src.database_tools.query import (DB_PATH, execute_query,
+                                                execute_query_with_lock)
+from mood_mate_src.database_tools.schema import (Doping, Language, User,
+                                                 UserSettings)
+from mood_mate_src.mate_logger import logger
 
 USERS_DB_TABLE = "users"
 
@@ -63,7 +60,7 @@ def create_user_from_telegram_message(message: Message) -> User:
         language = Language(lang_code)
     else:
         language = Language.ENG
-    
+
     return User(
         user_id=message.from_user.id,
         chat_id=message.chat.id,
@@ -99,7 +96,7 @@ async def add_user_to_db(user: User):
 
 
 async def update_user_in_db(user: User):
-    
+
     # Serialize settings to JSON string if present
     settings_json = json.dumps(user.settings.model_dump()) if user.settings else None
 
@@ -133,16 +130,16 @@ def get_user_from_db(user_id: int) -> User:
         return_result=True,
         dict_result=True
         )
-    
+
     # If the user is not found, return None
     if not user_data:
         return None
-    
+
     # Deserialize the settings JSON
     for user in user_data:
         user['settings'] = json.loads(user['settings'])
         user_res = User(**user)
-    
+
     # Return the User object
     return user_res
 
@@ -156,13 +153,13 @@ def get_all_users_from_db() -> list[User]:
         return_result=True,
         dict_result=True
         )
-    
+
     # Process case with no users
     if not users_data:
         return list()
-    
+
     users = list()
-    
+
     for user_data in users_data:
         # Deserialize the settings JSON
         user_data['settings'] = json.loads(user_data['settings'])
@@ -173,7 +170,7 @@ def get_all_users_from_db() -> list[User]:
 async def process_user_from_id(user_id: int) -> User | None:
     """Process the user database when new msg arrives
     Effectively creates or retrieves the user from the database
-    
+
     Args:
         user_id (int): user id
     """
@@ -186,10 +183,10 @@ async def process_user_from_id(user_id: int) -> User | None:
 async def process_user_db(message: Message) -> User | None:
     """Process the user database when new msg arrives
     Effectively creates or retrieves the user from the database
-    
+
     Args:
         message (Message): message object
-        
+
     Returns:
         User: user object
     """

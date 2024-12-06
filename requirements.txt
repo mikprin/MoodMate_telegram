@@ -1,6 +1,6 @@
 aiogram==3.13.1
 python-dotenv
-pydantic==2.9.2 
+pydantic==2.9.2
 redis==5.0.8
 pendulum
 pandas

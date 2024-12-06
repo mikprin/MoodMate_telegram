@@ -1,44 +1,32 @@
 # Moved here all the routes related to the mood survey
-import time
 import os
-from aiogram import Router, F
-from aiogram import types
-from aiogram.types import Message
+import time
+
+from aiogram import F, Router, types
 from aiogram.fsm.context import FSMContext
+from aiogram.types import Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from mood_mate_src.states_machine import AddRecord
-from mood_mate_src.messaging.send import send_message_to_chat_id
-from mood_mate_src.database_tools.users import (
-    User,
-    process_user_db,
-    process_user_from_id,
-)
-
-from mood_mate_src.database_tools.mood_data import MoodRecord, MoodData, add_mood_record_to_db
-from mood_mate_src.database_tools.redis_tools import (
-    UserSession,
-    create_user_session,
-    get_user_session,
-    get_today_session,
-    save_user_session,
-    remove_user_session,
-)
-from mood_mate_src.filters import (
-    ButtonTextFilter,
-    MoodCallbackFilter,
-    CallbackDataFilter,
-    validate_number_input,
-)
+from mood_mate_src.ai_agent.suggestions import get_ai_reaction_to_record
+from mood_mate_src.database_tools.mood_data import (MoodData, MoodRecord,
+                                                    add_mood_record_to_db)
+from mood_mate_src.database_tools.redis_tools import (UserSession,
+                                                      create_user_session,
+                                                      get_user_session,
+                                                      remove_user_session,
+                                                      save_user_session)
+from mood_mate_src.database_tools.users import (User, process_user_db,
+                                                process_user_from_id)
+from mood_mate_src.filters import (ButtonTextFilter, CallbackDataFilter,
+                                   MoodCallbackFilter, validate_number_input)
+from mood_mate_src.keyboard import (BUTTONS_TEXT_LANG, emotional_emoji_sets,
+                                    get_all_buttons_text,
+                                    get_inline_keyboard_buttons_from_list,
+                                    get_start_keyboard)
 from mood_mate_src.mate_logger import logger
-from mood_mate_src.keyboard import (
-    get_all_buttons_text,
-    BUTTONS_TEXT_LANG,
-    emotional_emoji_sets,
-    get_inline_keyboard_buttons_from_list,
-    get_start_keyboard
-)
+from mood_mate_src.messaging.send import send_message_to_chat_id
 from mood_mate_src.messaging.states_text import get_state_msg
+from mood_mate_src.states_machine import AddRecord
 
 
 def get_emoji_number_from_query(query: types.CallbackQuery) -> int:
@@ -70,12 +58,12 @@ async def track_mood_handler(message: Message, state: FSMContext):
     Asks for the mood emoji selection
     """
     user = await process_user_db(message)
-    
+
     session = create_user_session(user)
     await state.update_data(user=user)
     await state.set_state(AddRecord.mood)
     keyboard_buttons = emotional_emoji_sets["mood"].get_inline_keyboard_buttons()
-    
+
     builder = InlineKeyboardBuilder()
     for button in keyboard_buttons:
         builder.add(button)
@@ -91,7 +79,7 @@ async def mood_callback_handler(query: types.CallbackQuery, state: FSMContext):
     session = get_user_session(user.user_id)
     session.mood_record.data.mood = number
     save_user_session(session)
-    
+
     await state.set_state(AddRecord.sleep)
     await query.answer()
     await query.message.answer(f"{get_state_msg('sleep', user)}",
@@ -113,17 +101,17 @@ async def add_sleep_handler(message: Message, state: FSMContext):
     """Process the sleep input and
     go to the next `energy` state if the input is correct"""
     user = await process_user_db(message)
-    
+
     sleep_result = validate_number_input(message.text)
     if sleep_result is not False:
         # await state.update_data(sleep=sleep_result)
         await state.set_state(AddRecord.horny)
-        
+
         # Save data from sleep
         session = get_user_session(user.user_id)
         session.mood_record.data.sleep = sleep_result
         save_user_session(session)
-        
+
         builder = emotional_emoji_sets["energy"].get_keyboard_builder()
         await message.answer(f"{get_state_msg('energy', user)}", reply_markup=builder.as_markup())
     else:
@@ -142,10 +130,10 @@ async def energy_callback_handler(query: types.CallbackQuery, state: FSMContext)
     session = get_user_session(user.user_id)
     session.mood_record.data.energy = number
     save_user_session(session)
-    
+
     await state.set_state(AddRecord.exercise)
     await query.answer()
-    
+
     builder = emotional_emoji_sets["anxiety"].get_keyboard_builder()
     await query.message.answer(f"{get_state_msg('anxiety', user)}",
                                   reply_markup=builder.as_markup())
@@ -159,11 +147,11 @@ async def anxiety_callback_handler(query: types.CallbackQuery, state: FSMContext
     session = get_user_session(user.user_id)
     session.mood_record.data.anxiety = number
     save_user_session(session)
-    
+
     await state.set_state(AddRecord.exercise)
-    
+
     await query.answer()
-    
+
     await query.message.answer(f"{get_state_msg('exercise', user)}",
                                   reply_markup=types.ReplyKeyboardRemove())
 
@@ -182,7 +170,7 @@ async def add_exercise_handler(message: Message, state: FSMContext):
         save_user_session(session)
         await state.set_state(AddRecord.dopings)
         await message.answer(f"{get_state_msg('dopings', user)}")
-        
+
         keyboard_buttons = get_inline_keyboard_buttons_from_list(user.settings.dopings_list, "dopings")
         keyboard = types.InlineKeyboardMarkup(inline_keyboard=keyboard_buttons)
         await message.answer(f"{get_state_msg('dopings', user)}", reply_markup=keyboard)
@@ -206,11 +194,11 @@ async def add_dopings_handler(message: Message, state: FSMContext):
 async def dopings_callback_handler(query: types.CallbackQuery, state: FSMContext):
     """Callback handler for doping selection"""
     user = await process_user_db(query)
-    
+
     session = get_user_session(user.user_id)
     # logger.debug(f"User {user.user_id} picked: {query.data}")
     doping = query.data.split('_')[1]
-    
+
     if doping == "accept":
         # In this case move to the next state
         # Dopings are already saved!
@@ -220,7 +208,7 @@ async def dopings_callback_handler(query: types.CallbackQuery, state: FSMContext
         builder = emotional_emoji_sets["horny"].get_keyboard_builder()
         await query.message.reply(f"{get_state_msg('horny', user)}", reply_markup=builder.as_markup())
     else:
-        # Add or remove the doping from the list        
+        # Add or remove the doping from the list
         all_dopings = user.settings.dopings_list
         checked_dopings = session.mood_record.data.dopings
         if doping in checked_dopings:
@@ -273,11 +261,11 @@ async def add_futre_in_years_handler(message: Message, state: FSMContext):
 async def process_end_of_session(user: User, session: UserSession):
     """Process the end of the session
     Save it to DB and remove from cache"""
-    
+
     session.mood_record.date = time.strftime("%Y.%m.%d")
     # TODO save the data to the DB
     await add_mood_record_to_db(session.mood_record)
-    
+
     logger.debug(f"User {user.user_id} - {user.settings.username} saved the record: {session.mood_record.model_dump()}")
     remove_user_session(user.user_id)
 
@@ -288,7 +276,7 @@ async def no_note_callback_handler(query: types.CallbackQuery, state: FSMContext
     In case the user does not want to leave a note"""
     user = await process_user_from_id(query.from_user.id)
     session = get_user_session(user.user_id)
-    
+
     await process_end_of_session(user, session)
     await state.clear()
     record = session.mood_record.model_dump()
@@ -297,14 +285,18 @@ async def no_note_callback_handler(query: types.CallbackQuery, state: FSMContext
     if os.environ.get("DEBUG") == "True":
         await send_message_to_chat_id(user.chat_id, f"Your record:\n{record_text}")
     await query.answer()
-    await query.message.answer(f"{get_state_msg('record_saved', user)}", reply_markup=get_start_keyboard(user=user))
+    ai_response = get_ai_reaction_to_record(user, session.mood_record)
+    if ai_response is not None:
+        answer_message = ai_response
+    else:
+        answer_message = f"{get_state_msg('record_saved', user)}"
+    await query.message.answer(answer_message, reply_markup=get_start_keyboard(user=user))
 
 
 @router.callback_query(CallbackDataFilter("cancel_record"))
 async def cancel_record_callback_handler(query: types.CallbackQuery, state: FSMContext):
     """Cancel the record and delete the session"""
     user = await process_user_from_id(query.from_user.id)
-    session = get_user_session(user.user_id)
     remove_user_session(user.user_id)
     await state.clear()
     await query.answer()
@@ -316,10 +308,13 @@ async def add_note_handler(message: Message, state: FSMContext):
     """Process the note input and save the record. Also delete the session"""
     user = await process_user_db(message)
     session = get_user_session(user.user_id)
-    
     session.mood_record.data.note = message.text
     await process_end_of_session(user, session)
-    
     await state.clear()
-    await message.answer(f"{get_state_msg('record_saved', user)}\nYour input is {session.mood_record.model_dump()}",
+    ai_response = get_ai_reaction_to_record(user, session.mood_record)
+    if ai_response is not None:
+        answer_message = ai_response
+    else:
+        answer_message = f"{get_state_msg('record_saved', user)}"
+    await message.answer(answer_message,
                          reply_markup=get_start_keyboard(user=user))

@@ -1,14 +1,19 @@
 import asyncio
 import os
+
 # Setenv for the database path
 os.environ["SQLITE_DB_PATH"] = "./test_db.db"
 
 import unittest
-from unittest.mock import patch, AsyncMock
-from mood_mate_src.database_tools.users import get_user_from_db, User, UserSettings, add_user_to_db, Language, update_user_in_db
+from datetime import datetime
+from unittest.mock import AsyncMock, patch
+
 from mood_mate_src.database_tools.db_init import init_db
 from mood_mate_src.database_tools.query import DB_PATH
-from datetime import datetime
+from mood_mate_src.database_tools.users import (Language, User, UserSettings,
+                                                add_user_to_db,
+                                                get_user_from_db,
+                                                update_user_in_db)
 
 
 class TestGetUserFromDb(unittest.TestCase):
@@ -18,7 +23,7 @@ class TestGetUserFromDb(unittest.TestCase):
         print(f"DB_PATH: {DB_PATH}")
         # Set up an in-memory SQLite database
         init_db()
-        
+
     def tearDown(self):
         # Drop the table
         # Close the database connection if needed

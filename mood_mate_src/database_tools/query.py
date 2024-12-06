@@ -1,5 +1,5 @@
-import sqlite3
 import os
+import sqlite3
 
 DB_PATH = os.getenv("SQLITE_DB_PATH", "moodmate_db/mood_mate.db")
 
@@ -23,7 +23,7 @@ async def execute_query_with_lock(db_path,
                 result = [dict(row) for row in result]
             return result
         conn.close()
-        
+
 def execute_query(db_path, query, params=(), return_result=False, dict_result=False):
     conn = sqlite3.connect(db_path)
     if dict_result:

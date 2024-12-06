@@ -1,8 +1,8 @@
 import pandas as pd
-from mood_mate_src.database_tools.mood_data import (MoodRecord,
-                                                    MoodData,
-                                                    get_mood_records_from_db,
-                                                    get_user_records_for_past_time)
+
+from mood_mate_src.database_tools.mood_data import (
+    MoodData, MoodRecord, get_mood_records_from_db,
+    get_user_records_for_past_time)
 
 
 def flatten_record(record: MoodRecord) -> dict:

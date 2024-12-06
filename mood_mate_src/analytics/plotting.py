@@ -1,15 +1,17 @@
+import importlib.resources as pkg_resources
 import os
-import numpy as np
-import pandas as pd
+
 import emoji
-import matplotlib.pyplot as plt
 import matplotlib
 import matplotlib.cm as cm
 import matplotlib.colors as mcolors
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from matplotlib.offsetbox import AnnotationBbox, OffsetImage
 from scipy.interpolate import interp1d
-from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+
 import mood_mate_src.resources as resources_path
-import importlib.resources as pkg_resources
 from mood_mate_src.mate_logger import logger
 
 # Use the Noto Sans Symbols2 font or Noto Color Emoji for emojis
@@ -63,7 +65,7 @@ def get_list_from_string_or_list(string_or_list) -> list:
         return eval(string_or_list)
 
 axis_names = {
-    
+
     Language.ENG.value: {
         'mood': 'Mood',
         'energy': 'Energy',
@@ -76,7 +78,7 @@ axis_names = {
         'created_at': 'Created At',
         'recommended_sleep': 'Recommended Sleep'
     },
-    
+
     Language.RU.value: {
         'mood': 'Настроение',
         'energy': 'Энергия',
@@ -144,11 +146,11 @@ def get_plot_from_df(df: pd.DataFrame,
         True: if the plot was saved successfully
         False: if the DataFrame is empty or some other error occurred
     """
-    
-    
+
+
     if df.shape[0] == 0:
         return False
-    
+
     # Assuming df is your DataFrame with columns including 'created_at'
     df['created_at'] = pd.to_datetime(df['created_at'], unit='s')
 
@@ -188,7 +190,7 @@ def get_plot_from_df(df: pd.DataFrame,
         'xtick.color': 'white',
         'ytick.color': 'white'
     })
-    
+
     # Plot horny with color map based on its level
     # Normalize the horny data to fit into the colormap range [0, 1]
     (horny_min, horny_max) = get_emoji_limits('horny')
@@ -205,11 +207,11 @@ def get_plot_from_df(df: pd.DataFrame,
 
     # prepare to add dopings icons to the plot:
     dopings = df[df.dopings.apply(lambda x: len(get_list_from_string_or_list(x)) > 0)][['dopings', 'created_at', 'mood']]
-    
+
     # Add images column to the dopings dataframe as empty lists
     dopings['images'] = [list() for _ in range(len(dopings))]
-    
-    
+
+
     # dopings['emojis'] = dopings.dopings.apply(lambda x: find_emojis_in_list(x))
     # Now I have a DataFrame with only rows that have dopings
     if dopings.shape[0] > 0:
@@ -222,11 +224,11 @@ def get_plot_from_df(df: pd.DataFrame,
 
     # Setting up subplots
     fig, axes = plt.subplots(nrows=5, ncols=1, figsize=(10, 12), sharex=True)
-    
+
     # Plotting each variable with custom colors
     # Mood
     # axes[numbers_map['mood']].plot(df['created_at'], df['mood'], color=colors['mood'], linewidth=line_width)
-    
+
     # Plotting mood and overlaying horny as a colormap
     axes[numbers_map['mood']].plot(df['created_at'], df['mood'], color=colors['mood'], linewidth=line_width)
     for i in range(len(df) - 1):
@@ -236,8 +238,8 @@ def get_plot_from_df(df: pd.DataFrame,
             color=cmap(horny_normalized.iloc[i]),
             linewidth=line_width + 0.8  # Make the colormap line slightly thicker
         )
-    
-    
+
+
     # COLOR BAR NOT WORKING
     # Create a colorbar for horny
     # horny_colorbar = cm.ScalarMappable(cmap=cmap, norm=mcolors.Normalize(vmin=horny_min, vmax=horny_max))
@@ -248,19 +250,19 @@ def get_plot_from_df(df: pd.DataFrame,
     #              orientation='vertical',
     #              pad=0.01)
     # axes[numbers_map['mood']].set_xlabel('')
-    
+
     axes[numbers_map['mood']].set_ylabel(f'{axis_names[language]["mood"]}')
     axes[numbers_map['mood']].set_ylim(get_emoji_limits('mood'))
     axes[numbers_map['mood']].set_title(f'{over_time_it("mood", language=language)}', color='white')
 
     # Add emojis to the mood plot
     if dopings is not None:
-        
+
         with pkg_resources.path(resources_path, 'pictograms') as img_path:
             # img_path is a pathlib.Path object, which is an absolute path
             pictogram_folder = img_path.resolve()
             # print(f"Absolute path: {absolute_path}")
-        
+
         for idx, row in dopings.iterrows():
             if row['images']:  # Check if there are images to plot
                 # If the mood is high, the images should be plotted below the mood line
@@ -289,17 +291,17 @@ def get_plot_from_df(df: pd.DataFrame,
     if recommended_sleep is not None:
         # Optional recommended sleep part
         axes[numbers_map['sleep']].axhline(y=recommended_sleep, color='white', linestyle='--', linewidth=1, label=f'{axis_names[language]["recommended_sleep"]} {recommended_sleep}h')
-    
+
     axes[numbers_map['energy']].set_ylabel(f'{axis_names[language]["energy"]} & {axis_names[language]["sleep"]}')
     axes[numbers_map['energy']].set_title(f'{axis_names[language]["sleep"]} & {over_time_it("energy", language=language)}', color='white')
     axes[numbers_map['energy']].legend(loc='lower left')
 
     axes[numbers_map['future_in_years']].plot(df['created_at'], df['future_in_years'], color=colors['future_in_years'], linewidth=line_width)
     axes[numbers_map['future_in_years']].set_ylabel(f'{axis_names[language]["future_in_years"]}')
-    
+
     if df['future_in_years'].max() / (df['future_in_years'].min() + 0.1) > 10:  # If the range is too big for linear scale - use log scale
         axes[numbers_map['future_in_years']].set_yscale('log')
-    
+
     axes[numbers_map['future_in_years']].set_title(f'{over_time_it("future_in_years", language=language)}', color='white')
 
     axes[numbers_map['exercise']].plot(df['created_at'], df['exercise'], color=colors['exercise'], linewidth=line_width)
@@ -315,5 +317,5 @@ def get_plot_from_df(df: pd.DataFrame,
     # Save to file
     fig.patch.set_facecolor(background_color)
     fig.savefig(save_path, dpi=400, bbox_inches='tight', facecolor=background_color)
-    
+
     return True

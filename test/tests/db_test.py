@@ -1,28 +1,25 @@
+import asyncio
 import os
 import sqlite3
 import time
 import unittest
-import asyncio
 
 os.environ["SQLITE_DB_PATH"] = "./test_db.db"
 
 from mood_mate_src.database_tools.db_init import init_db, table_exists
+from mood_mate_src.database_tools.mood_data import (DATA_TABLE, MoodData,
+                                                    MoodRecord,
+                                                    add_mood_record_to_db)
 from mood_mate_src.database_tools.query import DB_PATH
 from mood_mate_src.database_tools.users import USERS_DB_TABLE
-from mood_mate_src.database_tools.mood_data import (
-    DATA_TABLE,
-    add_mood_record_to_db,
-    MoodData,
-    MoodRecord,
-)
 
 # def test_init_db():
-    
+
 #     print(f"DB_PATH: {DB_PATH}")
 #     init_db()
-    
+
 #     # print (table_exists(DB_PATH, USERS_DB_TABLE))
-    
+
 #     # Check if the USERS_DB_TABLE table exists
 #     assert table_exists(DB_PATH, USERS_DB_TABLE)
 #     assert table_exists(DB_PATH, DATA_TABLE)
@@ -42,7 +39,7 @@ class TestAddMoodRecordToDb(unittest.TestCase):
         os.remove(os.getenv("SQLITE_DB_PATH"))
 
     def test_add_mood_record_to_db(self):
-        
+
         # Define the test data
         data = MoodData(
             user_id = 1,
@@ -58,7 +55,7 @@ class TestAddMoodRecordToDb(unittest.TestCase):
             note = 'Feeling good',
             extra = {},
         )
-        
+
         record = MoodRecord(
             user_id = 1,
             date = '01.01.2021',
@@ -69,7 +66,7 @@ class TestAddMoodRecordToDb(unittest.TestCase):
         # Call the function to test
         # Use asincio.run() to run the async function
         asyncio.run(add_mood_record_to_db(record))
-    
+
         self.conn = sqlite3.connect(os.getenv("SQLITE_DB_PATH"))
         self.cursor = self.conn.cursor()
         # Verify the record was inserted correctly
