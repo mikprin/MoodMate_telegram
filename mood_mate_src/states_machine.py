@@ -1,5 +1,7 @@
-from aiogram.fsm.state import StatesGroup, State
+from aiogram.fsm.state import State, StatesGroup
+
 from mood_mate_src.database_tools.mood_data import MoodData
+
 
 class AddRecord(StatesGroup):
     """States implementing each field in MoodData model"""
@@ -21,3 +23,4 @@ class SettingsStates(StatesGroup):
     recommended_sleep = State()
     assistant_role = State()
     enter_custom_role = State()
+    ai_model = State()

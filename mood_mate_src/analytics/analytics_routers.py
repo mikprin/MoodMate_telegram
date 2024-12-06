@@ -3,27 +3,22 @@ import os
 import re
 import tempfile
 from datetime import timedelta
-from aiogram import Router
-from aiogram import types
-from aiogram.types import InlineKeyboardButton, Message, FSInputFile
-from aiogram.fsm.context import FSMContext
 
-from mood_mate_src.messaging.states_text import get_state_msg
-from mood_mate_src.filters import ButtonTextFilter, CallbackDataFilter
-from mood_mate_src.database_tools.users import (
-    process_user_db,
-    process_user_from_id
-)
-from mood_mate_src.keyboard import (
-    get_all_buttons_text,
-    BUTTONS_TEXT_LANG,
-    emotional_emoji_sets,
-    get_inline_keyboard_buttons_from_list,
-    get_start_keyboard
-)
-from mood_mate_src.mate_logger import logger
+from aiogram import Router, types
+from aiogram.fsm.context import FSMContext
+from aiogram.types import FSInputFile, InlineKeyboardButton, Message
+
 from mood_mate_src.analytics.convert import get_user_pandas_df
 from mood_mate_src.analytics.plotting import get_plot_from_df
+from mood_mate_src.database_tools.users import (process_user_db,
+                                                process_user_from_id)
+from mood_mate_src.filters import ButtonTextFilter, CallbackDataFilter
+from mood_mate_src.keyboard import (BUTTONS_TEXT_LANG, emotional_emoji_sets,
+                                    get_all_buttons_text,
+                                    get_inline_keyboard_buttons_from_list,
+                                    get_start_keyboard)
+from mood_mate_src.mate_logger import logger
+from mood_mate_src.messaging.states_text import get_state_msg
 
 router = Router()
 
@@ -36,7 +31,7 @@ async def track_mood_handler(message: Message, state: FSMContext):
     """
     user = await process_user_db(message)
     language = user.settings.language
-    
+
     keyboard = types.InlineKeyboardMarkup(
         # row_width=4,
         inline_keyboard=[
@@ -95,7 +90,7 @@ async def send_plot_for_period(call: types.CallbackQuery, time_period: int | Non
     logger.info(f"User {user.settings.username} requested the plot")
     # Get the CSV file
     df = get_user_pandas_df(user.user_id, time_period)
-    
+
     if df.shape[0] < 2:
         await call.answer()
         await call.message.answer(get_state_msg("not_enough_records", user))

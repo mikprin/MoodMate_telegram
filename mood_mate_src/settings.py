@@ -1,26 +1,18 @@
-from aiogram import Router, F
-from aiogram import types
-from aiogram.types import InlineKeyboardButton, Message
+from aiogram import F, Router, types
 from aiogram.fsm.context import FSMContext
+from aiogram.types import InlineKeyboardButton, Message
+
+from mood_mate_src.database_tools.users import (Language, User, UserSettings,
+                                                process_user_db,
+                                                process_user_from_id,
+                                                update_user_in_db)
 from mood_mate_src.filters import ButtonTextFilter, CallbackDataFilter
-from mood_mate_src.database_tools.users import (
-    User,
-    UserSettings,
-    Language,
-    process_user_db,
-    process_user_from_id,
-    update_user_in_db
-)
-from mood_mate_src.keyboard import (
-    get_all_buttons_text,
-    BUTTONS_TEXT_LANG,
-    get_inline_keyboard_buttons_from_list,
-    get_settings_keyboard,
-    get_inline_settings_keyboard
-)
+from mood_mate_src.keyboard import (BUTTONS_TEXT_LANG, get_all_buttons_text,
+                                    get_inline_keyboard_buttons_from_list,
+                                    get_inline_settings_keyboard,
+                                    get_settings_keyboard)
 from mood_mate_src.mate_logger import logger
 from mood_mate_src.messaging.states_text import get_state_msg
-
 
 router = Router()
 
@@ -69,7 +61,7 @@ async def change_language_handler(message: Message):
     user.settings.language = new_lang
     await update_user_in_db(user)
     await message.answer(f"{get_state_msg('lang_changed', user)}", reply_markup=get_settings_keyboard(user=user))
-    
+
 def create_toggle_handler(setting_name: str):
     """
     Creates a handler to toggle a specific boolean setting for the user.
@@ -83,7 +75,7 @@ def create_toggle_handler(setting_name: str):
             setattr(user.settings, setting_name, True)
         await update_user_in_db(user)
         await query.answer()
-        
+
         # Generate the message based on the new state
         new_state = "on" if getattr(user.settings, setting_name) else "off"
         message_key = f"toggle_{setting_name}_{new_state}"
@@ -91,7 +83,7 @@ def create_toggle_handler(setting_name: str):
             get_state_msg(message_key, user),
             reply_markup=get_inline_settings_keyboard(user=user)
         )
-    
+
     return toggle_handler
 
 

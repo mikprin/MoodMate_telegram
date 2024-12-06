@@ -1,12 +1,13 @@
 import sqlite3
 
 from mood_mate_src.database_tools.locks import user_db_lock
-from mood_mate_src.database_tools.query import (execute_query_with_lock,
-                                                DB_PATH,
-                                                execute_query)
-from mood_mate_src.database_tools.users import USERS_DB_TABLE, USERS_FEEDBACK_DB_TABLE
 from mood_mate_src.database_tools.mood_data import DATA_TABLE
+from mood_mate_src.database_tools.query import (DB_PATH, execute_query,
+                                                execute_query_with_lock)
+from mood_mate_src.database_tools.users import (USERS_DB_TABLE,
+                                                USERS_FEEDBACK_DB_TABLE)
 from mood_mate_src.mate_logger import logger
+
 
 def table_exists(db_path, table_name):
     """
@@ -29,9 +30,9 @@ def init_db():
     logger.debug(f"Initializing SQLite database at {DB_PATH}")
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    
+
     # Check if the USERS_DB_TABLE table exists
-    
+
     if not table_exists(DB_PATH, USERS_DB_TABLE):
         init_user_db()
 
@@ -73,8 +74,8 @@ def init_user_db():
     conn.commit()
     conn.close()
     logger.info(f"Table {USERS_DB_TABLE} created in the database {DB_PATH}")
-    
-    
+
+
 def init_data_db():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()

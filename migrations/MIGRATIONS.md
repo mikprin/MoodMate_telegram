@@ -70,7 +70,7 @@ Yes, migrating from SQLite to PostgreSQL later is entirely feasible, but there a
 Several tools can facilitate the migration process:
 
 - **`pgloader`**: A popular tool that can directly migrate data from SQLite to PostgreSQL, handling data type conversions and schema adjustments.
-  
+
   Example usage:
   ```bash
   pgloader sqlite:///your_db.sqlite postgresql:///your_db

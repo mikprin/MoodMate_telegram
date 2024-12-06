@@ -1,8 +1,11 @@
 import asyncio
+
 from dotenv import load_dotenv
-from mood_mate_src.database_tools.redis_tools import redis_watchdog_task
+
 from mood_mate_src.bot import run_bot
-from mood_mate_src.messaging.notifications import notification_routine, weekly_report_routine
+from mood_mate_src.database_tools.redis_tools import redis_watchdog_task
+from mood_mate_src.messaging.notifications import (notification_routine,
+                                                   weekly_report_routine)
 
 
 async def run_tasks():

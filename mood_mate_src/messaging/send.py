@@ -1,14 +1,12 @@
-import os
-from aiogram import exceptions
 import asyncio
-from aiogram import Bot
-from aiogram import Bot, Dispatcher, types, F
-from aiogram.types import Message, KeyboardButton
+import os
+
+from aiogram import Bot, Dispatcher, F, exceptions, types
 from aiogram.enums import ParseMode
+from aiogram.types import KeyboardButton, Message
 
-from mood_mate_src.mate_logger import logger
 from mood_mate_src.aiogram_utils.bot import get_bot
-
+from mood_mate_src.mate_logger import logger
 
 bot = get_bot()
 
@@ -17,12 +15,12 @@ async def send_message_to_chat_id(chat_id: int,
                                text: str,
                                disable_notification: bool = False,
                                username: str | None = None) -> bool:
-    
+
     if username is None:
         username_str = ""
     else:
         username_str = f" Username: @{username}"
-    
+
     try:
         await bot.send_message(chat_id, text, disable_notification=disable_notification)
     # except exceptions.BotBlocked:
@@ -58,9 +56,9 @@ async def send_message_to_chat_id(chat_id: int,
     return False
 
 async def send_file_to_user(chat_id: int, file: str, caption: str = None, disable_notification: bool = False) -> bool:
-    
+
     file_obj = types.FSInputFile(file)
-    
+
     try:
         await bot.send_document(chat_id, file_obj, caption=caption, disable_notification=disable_notification)
     except exceptions.TelegramRetryAfter as e:

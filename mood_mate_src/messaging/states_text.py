@@ -28,7 +28,7 @@ mood_record_states_messages = {
         "anxiety": "Какой у тебя уровень тревоги?",
         "energy": "Какой у тебя уровень энергии?",
         "future_in_years": "Насколько определенно ты видишь свое будущее? Укажи примерно в годах.",
-        "note": f"Есть что добавить? Напиши заметку, если хочешь. Если нет, просто нажми кнопку продолжить и я сохраню запись. Если не хочешь сохранять ее, то нажми  {BUTTONS_TEXT_LANG[Language.RU.value]['do_not_save']}",
+        "note": f"Есть что добавить? Напиши заметку, если хочешь 📝. Если нет, просто нажми кнопку продолжить и я сохраню запись. Если не хочешь сохранять ее, то нажми  {BUTTONS_TEXT_LANG[Language.RU.value]['do_not_save']}",
         "invalid_number_input": "Некорректный ввод. Введите число, разделенное точкой, если хотите ввести не целое число",
         "record_saved": "Я сохранил твою запись 🎉! Спасибо за то, что делишься своим настроением! 📝",
         "record_not_saved": "Я не сохранил твою запись 🚫!",
@@ -46,8 +46,10 @@ mood_record_states_messages = {
         "invalid_custom_role": "Введено некорректное название роли. Попробуйте снова.",
         "role_set": "Роль {} установлена как ваша роль ассистента.",
         "role_unchanged": "Роль ассистента не изменена. Текущая роль: {}",
+        "choose_ai_model": "Пожалуйста, выберите предпочитаемую вами модель ИИ:",
+        "ai_model_set": "Модель ИИ установлена на {}. ",
     },
-    
+
     Language.ENG.value: {
         "greetings": "Hello! I am MoodMate, your personal mood tracker.\nIt is important to keep track of our mood and emotions to understand how we are feeling and to identify patterns that may be affecting our mental health. This project aims to help people track their mood and emotions by providing them with a simple and easy-to-use tool that they can use to record their mood and emotions on a daily basis. With the appearance of data, you will be offered smart suggestions on what actions can and should be taken.\n"
         f"Let's start! Press the {BUTTONS_TEXT_LANG[Language.ENG.value]['track_mood']} button to make your first record."
@@ -67,7 +69,7 @@ mood_record_states_messages = {
         "anxiety": "What is your level of anxiety?",
         "energy": "What is your level of energy?",
         "future_in_years": "How certain do you see your future? Specify approximately in years.",
-        "note": f"Anything to add? Write a note if you want. If not, just press the {BUTTONS_TEXT_LANG[Language.ENG.value]['do_not_save']} button",
+        "note": f"Anything to add? Write a note if you want 📝. If not, just press the {BUTTONS_TEXT_LANG[Language.ENG.value]['do_not_save']} button",
         "invalid_number_input": "Invalid input. Enter a number separated by a dot if you want a non-integer",
         "record_saved": "I saved your record 🎉! Thank you for sharing your mood! 📝",
         "record_not_saved": "I didn't save your record 🚫!",
@@ -85,8 +87,10 @@ mood_record_states_messages = {
         "invalid_custom_role": "Invalid role name entered. Try again.",
         "role_set": "The role {} is set as your assistant role.",
         "role_unchanged": "The assistant role has not been changed. Current role: {}",
+        "choose_ai_model": "Please select the AI model you prefer:",
+        "ai_model_set": "AI model set to {}.",
     },
-    
+
 }
 
 reminder_notification_text = {

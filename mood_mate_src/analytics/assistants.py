@@ -1,5 +1,6 @@
 from mood_mate_src.database_tools.schema import AssistantRole
 
+
 def create_short_assistant_name(name: str) -> str:
     """
     Create a short name for the assistant
@@ -94,5 +95,3 @@ PREDEFINED_ASSITANT_ROLES = [
         role_description="Лосяш - это мудрый и добрый лось из вселенной смешариков, который поможет разобраться в жизненных ситуациях и принять правильное решение. Он всегда готов выслушать вас и дать совет."
     ),
 ]
-
-

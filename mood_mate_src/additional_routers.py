@@ -1,48 +1,37 @@
 # settings and other routers
-from aiogram import Router, F
-from aiogram import types
+from aiogram import F, Router, types
 from aiogram.filters import Command
-from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
+from aiogram.types import Message
 
-from mood_mate_src.filters import AdminFilter
-from mood_mate_src.database_tools.users import get_all_users_from_db, User
-from mood_mate_src.states_machine import SettingsStates
+from mood_mate_src.analytics.assistants import (PREDEFINED_ASSITANT_ROLES,
+                                                create_short_assistant_name)
+from mood_mate_src.analytics.user_analytics import get_user_statistics_text
+from mood_mate_src.database_tools.schema import (DEFAULT_ASSISTANT_ROLE,
+                                                 AIModel, AssistantRole,
+                                                 Language)
+from mood_mate_src.database_tools.users import (User, get_all_users_from_db,
+                                                process_user_db,
+                                                process_user_from_id,
+                                                update_user_in_db)
+from mood_mate_src.filters import (AdminFilter, ButtonTextFilter,
+                                   CallbackDataFilter, validate_number_input)
+from mood_mate_src.keyboard import (get_all_buttons_text, get_button_text,
+                                    get_inline_settings_keyboard,
+                                    get_settings_keyboard, get_start_keyboard)
+from mood_mate_src.mate_logger import logger
+from mood_mate_src.messaging.notifications import weekly_report
 from mood_mate_src.messaging.send import send_message_to_chat_id
 from mood_mate_src.messaging.states_text import get_state_msg
-from mood_mate_src.database_tools.users import (
-    process_user_db,
-    update_user_in_db,
-    process_user_from_id,
-)
-from mood_mate_src.database_tools.schema import DEFAULT_ASSISTANT_ROLE, Language
-from mood_mate_src.filters import ButtonTextFilter, CallbackDataFilter, validate_number_input
-from mood_mate_src.keyboard import (
-    get_all_buttons_text,
-    get_inline_settings_keyboard,
-    get_settings_keyboard,
-    get_start_keyboard,
-    get_button_text,
-)
-
-
-from mood_mate_src.filters import AdminFilter
-from mood_mate_src.database_tools.users import get_all_users_from_db, User
-from mood_mate_src.analytics.user_analytics import get_user_statistics_text
-
-from mood_mate_src.messaging.send import send_message_to_chat_id
-from mood_mate_src.messaging.notifications import weekly_report
-from mood_mate_src.analytics.assistants import PREDEFINED_ASSITANT_ROLES, create_short_assistant_name
-from mood_mate_src.mate_logger import logger
-from mood_mate_src.database_tools.schema import AssistantRole
+from mood_mate_src.states_machine import SettingsStates
 
 router = Router()
 
 @router.edited_message()
 async def edited_message_handler(edited_message: types.Message) -> None:
     await edited_message.answer("Please note: Edited message are not supported yet.")
-    
-    
+
+
 @router.message(Command("send_message_to_users"), AdminFilter())
 async def send_message_to_users(message: types.Message) -> None:
     users = get_all_users_from_db()
@@ -53,7 +42,7 @@ async def send_message_to_users(message: types.Message) -> None:
         await message.answer("Please provide text to send.")
     for user in users:
         await send_message_to_chat_id(user.chat_id, text)
-        
+
 @router.message(ButtonTextFilter(get_all_buttons_text("settings")))
 async def settings_handler(message: Message):
     user = await process_user_db(message)
@@ -98,7 +87,7 @@ async def change_language_handler(message: Message):
     user.settings.language = new_lang
     await update_user_in_db(user)
     await message.answer(f"{get_state_msg('lang_changed', user)}", reply_markup=get_settings_keyboard(user=user))
-    
+
 @router.callback_query(CallbackDataFilter("set_recommended_sleep"))
 async def set_recommended_sleep_callback_handler(query: types.CallbackQuery, state: FSMContext):
     '''Send user to the recommended_sleep state of FSM'''
@@ -106,7 +95,7 @@ async def set_recommended_sleep_callback_handler(query: types.CallbackQuery, sta
     await state.set_state(SettingsStates.recommended_sleep)
     await query.answer()
     await query.message.edit_text(get_state_msg("recommended_sleep", user))
-    
+
 @router.message(SettingsStates.recommended_sleep)
 async def set_recommended_sleep_handler(message: Message, state: FSMContext):
     '''Set the recommended_sleep value to the user'''
@@ -140,7 +129,7 @@ async def set_assistant_role_callback_handler(query: types.CallbackQuery, state:
                                                 callback_data="keep_current_role")])
 
     inline_keyboard = types.InlineKeyboardMarkup(inline_keyboard=keyboard)
-    
+
     current_role = user.settings.assistant_custom_role
     text = get_state_msg("choose_assistant_role", user)
     if current_role is not None:
@@ -155,11 +144,11 @@ async def keep_current_role_callback_handler(query: types.CallbackQuery, state: 
     user = await process_user_from_id(query.from_user.id)
     await state.clear()
     await query.answer()
-    
+
     if user.settings.assistant_custom_role is None:
         role_name = DEFAULT_ASSISTANT_ROLE.role_name
     else:
-        role_name = user.settings.assistant_custom_role.role_name    
+        role_name = user.settings.assistant_custom_role.role_name
     await query.message.edit_text(get_state_msg("role_unchanged", user).format(role_name))
 
 @router.callback_query(CallbackDataFilter("select_role_"))
@@ -199,14 +188,42 @@ async def enter_custom_role_handler(message: Message, state: FSMContext):
     await update_user_in_db(user)
     await state.clear()
     await message.answer(get_state_msg("role_set", user).format(custom_role.role_name), reply_markup=get_start_keyboard(user=user))
- 
+
 # Admin routers
 @router.message(Command("get_stats"), AdminFilter())
 async def get_stats(message: types.Message) -> None:
     stats = get_user_statistics_text()
     await message.answer(stats)
-    
+
 @router.message(Command("send_weekly_report"), AdminFilter())
 async def send_weekly_report(message: types.Message) -> None:
     await weekly_report()
     await message.answer("Weekly report sent.")
+
+
+# AI model selection logic
+@router.callback_query(CallbackDataFilter("set_ai_model"))
+async def set_ai_model_callback_handler(query: types.CallbackQuery, state: FSMContext):
+    """Send user to select an AI model."""
+    user = await process_user_from_id(query.from_user.id)
+    keyboard = [
+        [types.InlineKeyboardButton(text=model.value, callback_data=f"select_ai_model_{model.name}")]
+        for model in AIModel
+    ]
+    inline_keyboard = types.InlineKeyboardMarkup(inline_keyboard=keyboard)
+    text = get_state_msg("choose_ai_model", user)
+    await state.set_state(SettingsStates.ai_model)
+    await query.answer()
+    await query.message.edit_text(text, reply_markup=inline_keyboard)
+
+@router.callback_query(CallbackDataFilter("select_ai_model_"))
+async def select_ai_model_callback_handler(query: types.CallbackQuery, state: FSMContext):
+    """Handle selection of an AI model."""
+    user = await process_user_from_id(query.from_user.id)
+    selected_model_name = query.data.replace("select_ai_model_", "")
+    selected_model = AIModel[selected_model_name]
+    user.settings.ai_model = selected_model
+    await update_user_in_db(user)
+    await state.clear()
+    await query.answer()
+    await query.message.edit_text(get_state_msg("ai_model_set", user).format(selected_model.value))

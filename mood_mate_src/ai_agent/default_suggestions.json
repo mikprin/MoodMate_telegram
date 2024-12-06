@@ -1,0 +1,177 @@
+[
+    {
+        "suggestion": {
+            "en": "Take a 10-minute walk outdoors.",
+            "ru": "Прогуляйтесь на улице в течение 10 минут."
+        },
+        "categories": [
+            "physical_activity",
+            "mental_health",
+            "stress_relief"
+        ]
+    },
+    {
+        "suggestion": {
+            "en": "Practice deep breathing exercises for 5 minutes.",
+            "ru": "Практикуйте дыхательные упражнения в течение 5 минут."
+        },
+        "categories": [
+            "relaxation",
+            "stress_management",
+            "anxiety_relief"
+        ]
+    },
+    {
+        "suggestion": {
+            "en": "Write down three things you are grateful for.",
+            "ru": "Запишите три вещи, за которые вы благодарны."
+        },
+        "categories": [
+            "gratitude",
+            "positivity",
+            "emotional_wellbeing"
+        ]
+    },
+    {
+        "suggestion": {
+            "en": "Listen to your favorite calming music.",
+            "ru": "Послушайте вашу любимую успокаивающую музыку."
+        },
+        "categories": [
+            "relaxation",
+            "stress_relief",
+            "mood_improvement"
+        ]
+    },
+    {
+        "suggestion": {
+            "en": "Spend time on a creative activity like drawing or crafting.",
+            "ru": "Займитесь творческой деятельностью, такой как рисование или рукоделие."
+        },
+        "categories": [
+            "creativity",
+            "stress_relief",
+            "hobby"
+        ]
+    },
+    {
+        "suggestion": {
+            "en": "Reach out to a friend or family member for a short chat.",
+            "ru": "Свяжитесь с другом или членом семьи для короткого разговора."
+        },
+        "categories": [
+            "social_connection",
+            "emotional_support",
+            "positivity"
+        ]
+    },
+    {
+        "suggestion": {
+            "en": "Try a short guided meditation.",
+            "ru": "Попробуйте короткую направленную медитацию."
+        },
+        "categories": [
+            "mindfulness",
+            "relaxation",
+            "stress_management"
+        ]
+    },
+    {
+        "suggestion": {
+            "en": "Drink a glass of water mindfully.",
+            "ru": "Выпейте стакан воды осознанно."
+        },
+        "categories": [
+            "hydration",
+            "mindfulness",
+            "self_care"
+        ]
+    },
+    {
+        "suggestion": {
+            "en": "Read a chapter of a book you enjoy.",
+            "ru": "Прочитайте главу книги, которая вам нравится."
+        },
+        "categories": [
+            "relaxation",
+            "hobby",
+            "stress_relief"
+        ]
+    },
+    {
+        "suggestion": {
+            "en": "Try some gentle stretching exercises.",
+            "ru": "Попробуйте выполнить несколько легких упражнений на растяжку."
+        },
+        "categories": [
+            "physical_activity",
+            "relaxation",
+            "stress_relief"
+        ]
+    },
+    {
+        "suggestion": {
+            "en": "Write down your thoughts and feelings in a journal.",
+            "ru": "Запишите свои мысли и чувства в дневник."
+        },
+        "categories": [
+            "self_reflection",
+            "emotional_wellbeing",
+            "stress_relief"
+        ]
+    },
+    {
+        "suggestion": {
+            "en": "Plan yoga class or follow an online yoga video.",
+            "ru": "Запланируйте занятие йогой или следуйте онлайн-видео по йоге."
+        },
+        "categories": [
+            "physical_activity",
+            "relaxation",
+            "stress_relief"
+        ]
+    },
+    {
+        "suggestion": {
+            "ru": "Приготовьте себе какао",
+            "en": "Make yourself a hot cocoa"
+        },
+        "categories": [
+            "comfort",
+            "relaxation",
+            "stress_relief"
+        ]
+    },
+    {
+        "suggestion": {
+          "en": "Prepare some snackable food, preferably fresh, like cutting cucumbers and red peppers with cream cheese. You can also add an apple.",
+          "ru": "Приготовить какую-то еду, которую можно кусочничать. Желательно свежую, например огурцы нарезать и красный перец с творожным сырком. Можно есчо яблочко."
+        },
+        "categories": [
+          "nutrition",
+          "self_care"
+        ]
+      },
+      {
+        "suggestion": {
+          "en": "Do something with your hands, even something simple like organizing books or sorting through shelves.",
+          "ru": "Поделать что нибудь руками, даже если простое, как красить книги или перебирать какие то полки."
+        },
+        "categories": [
+          "manual_activity",
+          "mindfulness",
+          "organization"
+        ]
+      },
+      {
+        "suggestion": {
+          "en": "Put on fresh bed linens.",
+          "ru": "Застелить чистое постельное белье."
+        },
+        "categories": [
+          "self_care",
+          "home_improvement",
+          "cleanliness"
+        ]
+      }
+]

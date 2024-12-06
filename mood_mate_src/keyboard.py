@@ -1,8 +1,9 @@
-from aiogram.types.keyboard_button import KeyboardButton
-from aiogram.types.inline_keyboard_button import InlineKeyboardButton
-from aiogram.utils.keyboard import InlineKeyboardBuilder
-from aiogram import types
 import emoji
+from aiogram import types
+from aiogram.types.inline_keyboard_button import InlineKeyboardButton
+from aiogram.types.keyboard_button import KeyboardButton
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+
 from mood_mate_src.database_tools.users import Language, User
 from mood_mate_src.messaging.lang_support import get_msg_from_dict
 
@@ -32,8 +33,9 @@ BUTTONS_TEXT_LANG = {
     "set_assistant_role": "Роль ассистента",
     "keep_current_role": "Оставить текущую роль",
     "enter_custom_role": "Введите свою роль",
+    "set_ai_model": "Установить модель генеративного ИИ",
     },
-    
+
     Language.ENG.value: {
     "go_back": "Go back! 🔙",
     "settings": "⚙️",
@@ -59,6 +61,7 @@ BUTTONS_TEXT_LANG = {
     "set_assistant_role": "Your assistant role",
     "keep_current_role": "Keep current role",
     "enter_custom_role": "Enter custom role",
+    "set_ai_model": "Set AI model",
     }
 }
 
@@ -70,13 +73,13 @@ def get_button_text(button_text: str, user: User) -> str:
 def get_all_buttons_text(button_text: str) -> list[str]:
     langs = [lang.value for lang in Language]
     return [BUTTONS_TEXT_LANG[lang][button_text] for lang in langs]
-    
+
 
 def get_inline_keyboard_buttons_from_list(options: list[str], callback_group: str, picked_options: list[str] = list()) -> list[InlineKeyboardButton]:
     """Create a list of InlineKeyboardButtons from a list of options.
     Used for creating a checklist of options for the user to choose from."""
     keyboard_buttons = list()
-    
+
     for option in options:
         if option in picked_options:
             keyboard_buttons.append([InlineKeyboardButton(text=f"{option} ✅",
@@ -86,7 +89,7 @@ def get_inline_keyboard_buttons_from_list(options: list[str], callback_group: st
             keyboard_buttons.append([InlineKeyboardButton(text=option,
                              callback_data=f"{callback_group}_{option}"
             )])
-            
+
     # TODO: Accept button language should be based on the user language
     accept_button = InlineKeyboardButton(text=BUTTONS_TEXT_LANG[Language.ENG.value]["accept"],
                                          callback_data=f"{callback_group}_accept"
@@ -99,12 +102,12 @@ def get_lang(user: User | None = None) -> str:
     if user is None:
         return Language.ENG.value
     return user.settings.language
-    
+
 
 def get_start_keyboard(user: User | None = None):
-    
+
     language = get_lang(user)
-    
+
     keyboard_buttons = [
         [
             KeyboardButton(text=BUTTONS_TEXT_LANG[language]["track_mood"]),
@@ -123,9 +126,9 @@ def get_start_keyboard(user: User | None = None):
 
 
 def get_settings_keyboard(user: User | None = None):
-    
+
     language = get_lang(user)
-    
+
     keyboard_buttons = [
         [
             KeyboardButton(text=BUTTONS_TEXT_LANG[language]["change_language"]),
@@ -142,12 +145,12 @@ def get_settings_keyboard(user: User | None = None):
     return keyboard
 
 def get_inline_settings_keyboard(user: User | None = None) -> InlineKeyboardBuilder:
-        
+
     if user is None:
         language = Language.ENG.value
     else:
         language = get_lang(user)
-        
+
     inline_keyboard=[
         [
             InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["change_language"],
@@ -164,6 +167,10 @@ def get_inline_settings_keyboard(user: User | None = None) -> InlineKeyboardBuil
         [
             InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["set_assistant_role"],
                                  callback_data="set_assistant_role"),
+        ],
+        [
+            InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["set_ai_model"],
+                                 callback_data="set_ai_model"),
         ]
     ]
     if user is not None:
@@ -179,7 +186,7 @@ def get_inline_settings_keyboard(user: User | None = None) -> InlineKeyboardBuil
             ])
     keyboard = types.InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
     return keyboard
-        
+
 
 class EmojiSet():
     """EmojiSet class is used to store a set of emojis for a specific mood or emotion.
@@ -189,21 +196,21 @@ class EmojiSet():
                  emoji_set: list,
                  data_type_names: list[str] | None = None,
                  comment: dict | None=None) -> None:  # Dict with language keys and comments as values
-                
+
         self.emoji_set = emoji_set
         self.comment = comment
         self.data_type_names = data_type_names
-        
+
     def get_number_from_emoji(self, emoji: str):
         return self.emoji_set.index(emoji)
-    
+
     def get_inline_keyboard_buttons(self, callback_group: str | None = None) -> list[InlineKeyboardButton]:
-        
+
         if not callback_group:
             if self.data_type_names is None:
                 raise ValueError("No data type names provided for the emoji set.")
             callback_group = self.data_type_names[0]
-        
+
         keyboard_buttons = [
             InlineKeyboardButton(text=emoji,
                                  callback_data=f"{callback_group}_{self.get_number_from_emoji(emoji)}"
@@ -211,9 +218,9 @@ class EmojiSet():
             for emoji in self.emoji_set
         ]
         return keyboard_buttons
-    
+
     def get_keyboard_buttons(self):
-        
+
         keyboard_buttons = [
             [
                 KeyboardButton(text=emoji)
@@ -221,16 +228,16 @@ class EmojiSet():
             ]
         ]
         return keyboard_buttons
-    
+
     def get_comment(self, language: str = Language.ENG.value):
         if self.comment is None:
             return ""
         elif language not in self.comment:
             return ""
         return self.comment[language]
-    
+
     def get_keyboard_builder(self) -> InlineKeyboardBuilder:
-        
+
         keyboard_buttons = self.get_inline_keyboard_buttons()
         builder = InlineKeyboardBuilder()
         for button in keyboard_buttons:
@@ -243,13 +250,13 @@ def find_emojis_in_string(string: str) -> list:
 
 
 emotional_emoji_sets = {
-    
+
     # For mood
     "mood" : EmojiSet(
         emoji_set = ['😭', '😢', '😟', '😐', '🙂', '😃', '😄'],
         data_type_names = ["mood"]
     ),
-    
+
     # For horny level:
     "horny" : EmojiSet(
         emoji_set = ['😐', '🙂', '😏', '😍', '😈', '🔥'],
@@ -320,5 +327,3 @@ emotional_emoji_sets = {
         }
     ),
 }
-
-

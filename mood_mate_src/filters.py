@@ -1,7 +1,8 @@
 from aiogram.filters import BaseFilter
-from aiogram.types import Message, CallbackQuery
-from mood_mate_src.keyboard import emotional_emoji_sets
+from aiogram.types import CallbackQuery, Message
+
 from mood_mate_src.admins import admins
+from mood_mate_src.keyboard import emotional_emoji_sets
 
 
 def validate_number_input(number: str) -> bool:
@@ -33,7 +34,7 @@ class CallbackDataFilter(BaseFilter):
         self.prefix = prefix
 
     async def __call__(self, call: CallbackQuery) -> bool:
-        return call.data.startswith(self.prefix)   
+        return call.data.startswith(self.prefix)
 
 class MoodCallbackFilter(BaseFilter):
     async def __call__(self, call: CallbackQuery):

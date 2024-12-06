@@ -1,10 +1,12 @@
-import os
 import json
+import os
 from datetime import datetime, timedelta
 
 from pydantic import BaseModel
-from mood_mate_src.database_tools.query import execute_query_with_lock, execute_query, DB_PATH
+
 from mood_mate_src.database_tools.locks import data_db_lock
+from mood_mate_src.database_tools.query import (DB_PATH, execute_query,
+                                                execute_query_with_lock)
 
 DATA_TABLE = "users_data"
 
@@ -32,10 +34,10 @@ class MoodData(BaseModel):
     note: str | None = None
     extra: dict | None = None
     future_in_years: float | None = None
-    
+
     class ConfigDict:
         orm_mode = True
-    
+
 class MoodRecord(BaseModel):
     """Root record object for mood records. Prototype for the database:
     (
@@ -48,10 +50,10 @@ class MoodRecord(BaseModel):
     date: str
     created_at: int
     data: MoodData
-    
+
     class ConfigDict:
         orm_mode = True
-        
+
 async def add_mood_record_to_db(record: MoodRecord):
     """Add a mood record to the database.
     This function is async and will be executed with a lock.
@@ -60,7 +62,7 @@ async def add_mood_record_to_db(record: MoodRecord):
         record (MoodRecord): _description_
     """
     record_data_json = json.dumps(record.data.model_dump())
-    
+
     await execute_query_with_lock(
         db_path=DB_PATH,
         db_lock=data_db_lock,
@@ -69,7 +71,7 @@ async def add_mood_record_to_db(record: MoodRecord):
         VALUES (?, ?, ?, ?)
         ''',
         params=(record.user_id, record.date, record.created_at, record_data_json))
-    
+
 
 def get_mood_records_from_db(user_id: int) -> list[MoodRecord]:
     """Get all mood records for a user from the database.
@@ -90,7 +92,7 @@ def get_mood_records_from_db(user_id: int) -> list[MoodRecord]:
         params=(user_id,),
         return_result=True,
         dict_result=False)
-    
+
     if rows is None:
         return records
     for row in rows:
@@ -115,13 +117,13 @@ def get_user_records_for_past_time(user_id: int, time_period: int) -> list[MoodR
         list[MoodRecord]: List of mood records for the user within the specified time period.
     """
     records = []
-    
+
     # Calculate the starting date (current time - time_period)
     start_date = int(datetime.now().timestamp()) - time_period
-    
+
     # Cast start_date to int
-    
-    
+
+
     query = f'''
     SELECT * FROM {DATA_TABLE}
     WHERE user_id = ? AND created_at >= ?
@@ -133,10 +135,10 @@ def get_user_records_for_past_time(user_id: int, time_period: int) -> list[MoodR
         return_result=True,
         dict_result=False,
     )
-    
+
     if rows is None:
         return records
-    
+
     for row in rows:
         record = MoodRecord(
             user_id=row[0],
@@ -145,7 +147,7 @@ def get_user_records_for_past_time(user_id: int, time_period: int) -> list[MoodR
             data=MoodData(**json.loads(row[3]))
         )
         records.append(record)
-    
+
     return records
 
 
@@ -159,10 +161,10 @@ def get_all_records_for_past_time(time_period: int) -> list[MoodRecord]:
         list[MoodRecord]: List of mood records within the specified time period.
     """
     records = []
-    
+
     # Calculate the starting date (current time - time_period)
     start_date = int(datetime.now().timestamp()) - time_period
-    
+
     query = f'''
     SELECT * FROM {DATA_TABLE}
     WHERE created_at >= ?
@@ -174,10 +176,10 @@ def get_all_records_for_past_time(time_period: int) -> list[MoodRecord]:
         return_result=True,
         dict_result=False,
     )
-    
+
     if rows is None:
         return records
-    
+
     for row in rows:
         record = MoodRecord(
             user_id=row[0],
@@ -186,5 +188,5 @@ def get_all_records_for_past_time(time_period: int) -> list[MoodRecord]:
             data=MoodData(**json.loads(row[3]))
         )
         records.append(record)
-    
+
     return records
