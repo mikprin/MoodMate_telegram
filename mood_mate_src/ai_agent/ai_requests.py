@@ -9,18 +9,20 @@ from mood_mate_src.database_tools.schema import AssistantRole, User
 from mood_mate_src.mate_logger import logger
 
 METRICS_EXPLANATION = f"""Here is the description of the metrics used and how they are presented to the user:
-mood": "How are you feeling right now? (scale of 7)
+mood": "How are you feeling right now? (scale of 0 to 6)
 sleep": "How many hours did you sleep today? Enter a number separated by a dot if you want a non-integer
 exercise": "Approximately how many hours did you exercise? Enter a number separated by a dot if you want a non-integer. If you haven't exercised yet but plan to, put 0 and make another mood record after the workout! I will take this into account in the statistics. Your efforts will be recorded!",
 dopings": "What doping did you take today? Check the buttons! If the necessary ones are not in the list, enter them in text separated by commas, at the end press the continue button",
-anxiety": "What is your level of anxiety? (scale of 6)
-energy": "What is your level of energy? (scale of 6)
+anxiety": "What is your level of anxiety? (scale 0 to 5)
+energy": "What is your level of energy? (scale 0 to 5)
 future_in_years": "How certain do you see your future? Specify approximately in years.
 note": f"Anything to add? Write a note if you want.
 """
 
 
-def get_user_report_prompt_from_records(records: list, user: User, role: AssistantRole = DEFAULT_ASSISTANT_ROLE) -> str:
+def get_user_report_prompt_from_records(
+    records: list, user: User, role: AssistantRole = DEFAULT_ASSISTANT_ROLE
+) -> str:
     """
     Get prompt for creating a report from records
     """
@@ -41,9 +43,10 @@ def get_user_report_prompt_from_records(records: list, user: User, role: Assista
         prompt += f"Answer in Russian language!"
     return prompt
 
-def get_user_report_for_past_time(delta: int,
-                                  user: User,
-                                  role: AssistantRole = DEFAULT_ASSISTANT_ROLE) -> str:
+
+def get_user_report_for_past_time(
+    delta: int, user: User, role: AssistantRole = DEFAULT_ASSISTANT_ROLE
+) -> str:
     """
     Get prompt for creating a report for the last delta seconds
     """
@@ -67,15 +70,9 @@ def make_open_ai_request_routed(messages: list[dict], model_name="gpt-4o-mini") 
     auth_token = os.getenv("OPENAI_RELAY_KEY", "")
     api_url = os.getenv("RELAY_API_URL", "localhost:8000/api/open_ai_request")
 
-    headers = {
-        "Authorization": auth_token,
-        "Content-Type": "application/json"
-    }
+    headers = {"Authorization": auth_token, "Content-Type": "application/json"}
 
-    payload = {
-        "model_name": model_name,
-        "messages": messages
-    }
+    payload = {"model_name": model_name, "messages": messages}
 
     try:
         response = requests.post(api_url, json=payload, headers=headers)
@@ -106,7 +103,9 @@ def make_open_ai_request_routed(messages: list[dict], model_name="gpt-4o-mini") 
 #         return None
 
 
-def get_simple_messages_from_role(prompt: str, role: AssistantRole, model_name: str | None = None) -> list[dict]:
+def get_simple_messages_from_role(
+    prompt: str, role: AssistantRole, model_name: str | None = None
+) -> list[dict]:
     """Create a list of messages from the role and the prompt"""
     if role.role_description is not None:
         role_description = f"Your role is {role.role_name}. Description of your role: {role.role_description}"
@@ -115,12 +114,14 @@ def get_simple_messages_from_role(prompt: str, role: AssistantRole, model_name: 
 
     messages = [
         {"role": "system", "content": role_description},
-        {"role": "user", "content": prompt}
+        {"role": "user", "content": prompt},
     ]
     return messages
 
-def get_user_report_for_past_time_with_open_ai(delta: int,
-                                               user: User) -> dict[str,str] | None:
+
+def get_user_report_for_past_time_with_open_ai(
+    delta: int, user: User
+) -> dict[str, str] | None:
     """
     Get prompt for creating a report for the last delta seconds
     """
@@ -136,21 +137,25 @@ def get_user_report_for_past_time_with_open_ai(delta: int,
     logger.info(f"Using model {model_name} for user {user.settings.username}")
 
     prompt = get_user_report_for_past_time(delta, user, role=role)
-    messages = get_simple_messages_from_role(prompt, role=role, model_name = model_name)
+    messages = get_simple_messages_from_role(prompt, role=role, model_name=model_name)
     response = make_open_ai_request_routed(messages=messages, model_name=model_name)
 
     # Add response disclamer:
-    if ("error" in response.keys()):
+    if "error" in response.keys():
         logger.error(f"OpenAI request failed: {response['error']}")
         return response
-    if 'response' in response.keys():
+    if "response" in response.keys():
         # resp_text = response['response']
         pass
     else:
         logger.error(f"OpenAI response does not contain 'response' key")
         return None
     if user.settings.language == "ru":
-        response['response'] += f"\n\nВаш скромный еженедельный отчет от {role.role_name} 📊. Не бери близко к сердцу, ведь я не настоящий, а вот ты да!"
+        response[
+            "response"
+        ] += f"\n\nВаш скромный еженедельный отчет от {role.role_name} 📊. Не бери близко к сердцу, ведь я не настоящий, а вот ты да!"
     else:
-        response['response'] += f"\n\nYour humble weekly report from {role.role_name} 📊. Don't take it to heart, because I'm not real, but you are!"
+        response[
+            "response"
+        ] += f"\n\nYour humble weekly report from {role.role_name} 📊. Don't take it to heart, because I'm not real, but you are!"
     return response

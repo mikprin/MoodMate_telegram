@@ -8,8 +8,12 @@ from aiogram import Router, types
 from aiogram.fsm.context import FSMContext
 from aiogram.types import FSInputFile, InlineKeyboardButton, Message
 
-from mood_mate_src.analytics.convert import get_user_pandas_df
+from mood_mate_src.analytics.convert import (convert_records_to_pandas,
+                                             get_user_pandas_df)
+from mood_mate_src.analytics.dopings_analytics import \
+    get_dopings_monthly_summary
 from mood_mate_src.analytics.plotting import get_plot_from_df
+from mood_mate_src.database_tools.mood_data import get_mood_records_from_db
 from mood_mate_src.database_tools.users import (process_user_db,
                                                 process_user_from_id)
 from mood_mate_src.filters import ButtonTextFilter, CallbackDataFilter
@@ -36,32 +40,45 @@ async def track_mood_handler(message: Message, state: FSMContext):
         # row_width=4,
         inline_keyboard=[
             [
-                InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["get_csv"],
-                                    callback_data="get_csv")
+                InlineKeyboardButton(
+                    text=BUTTONS_TEXT_LANG[language]["get_csv"], callback_data="get_csv"
+                )
             ],
             [
-                InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["get_plot"],
-                                     callback_data="get_plot_all"),
+                InlineKeyboardButton(
+                    text=BUTTONS_TEXT_LANG[language]["get_plot"],
+                    callback_data="get_plot_all",
+                ),
             ],
             [
-                InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["get_plot_7_days"],
-                                     callback_data="get_plot_7_days"),
+                InlineKeyboardButton(
+                    text=BUTTONS_TEXT_LANG[language]["get_plot_7_days"],
+                    callback_data="get_plot_7_days",
+                ),
             ],
             [
-                InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["get_plot_30_days"],
-                                     callback_data="get_plot_30_days"),
+                InlineKeyboardButton(
+                    text=BUTTONS_TEXT_LANG[language]["get_plot_30_days"],
+                    callback_data="get_plot_30_days",
+                ),
             ],
             [
-                InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["get_plot_60_days"],
-                                     callback_data="get_plot_60_days"),
+                InlineKeyboardButton(
+                    text=BUTTONS_TEXT_LANG[language]["get_plot_60_days"],
+                    callback_data="get_plot_60_days",
+                ),
             ],
-            # [
-            #     InlineKeyboardButton(text=BUTTONS_TEXT_LANG[language]["toggle_reminder"],
-            #                         callback_data="toggle_reminder"),
-            # ],
+            [
+                InlineKeyboardButton(
+                    text=BUTTONS_TEXT_LANG[language]["doping_report"],
+                    callback_data="doping_report",
+                ),
+            ],
         ]
     )
-    await message.answer(BUTTONS_TEXT_LANG[language]["mood_data"], reply_markup=keyboard)
+    await message.answer(
+        BUTTONS_TEXT_LANG[language]["mood_data"], reply_markup=keyboard
+    )
 
 
 @router.callback_query(CallbackDataFilter("get_csv"))
@@ -84,7 +101,9 @@ async def get_csv_handler(call: types.CallbackQuery):
         logger.info(f"CSV file sent to user {user.settings.username}")
 
 
-async def send_plot_for_period(call: types.CallbackQuery, time_period: int | None = None):
+async def send_plot_for_period(
+    call: types.CallbackQuery, time_period: int | None = None
+):
     """Helper function to send a plot for a specific time period"""
     user = await process_user_from_id(call.from_user.id)
     logger.info(f"User {user.settings.username} requested the plot")
@@ -117,3 +136,19 @@ async def get_plot_handler(call: types.CallbackQuery):
         else:
             time_period = timedelta(days=int(period_str)).total_seconds()
         await send_plot_for_period(call, time_period)
+
+
+@router.callback_query(CallbackDataFilter("doping_report"))
+async def doping_report_handler(call: types.CallbackQuery):
+    user = await process_user_from_id(call.from_user.id)
+
+    # Get dataframe droping the rows with NaN and [] values for the dopings column
+    records = get_mood_records_from_db(user.user_id)
+    df = convert_records_to_pandas(records, drop_na_for=["dopings"])
+    if df.shape[0] < 2:
+        await call.answer()
+        await call.message.answer(get_state_msg("not_enough_records", user))
+    else:
+        summary = get_dopings_monthly_summary(df, user)
+        await call.answer()
+        await call.message.answer(summary)
