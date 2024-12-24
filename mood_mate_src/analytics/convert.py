@@ -12,19 +12,30 @@ def flatten_record(record: MoodRecord) -> dict:
     # Flatten data into record_dict
     return_dict = dict()
     return_dict.update(record_dict)
-    return_dict.update(record_dict['data'])
-    return_dict.pop('data')
+    return_dict.update(record_dict["data"])
+    return_dict.pop("data")
     return return_dict
 
-def convert_records_to_pandas(records: list[MoodRecord]) -> pd.DataFrame:
+
+def convert_records_to_pandas(
+    records: list[MoodRecord], drop_na_for: list | None = None
+) -> pd.DataFrame:
     """Convert a list of MoodRecord objects into a pandas DataFrame."""
     flatten_records = []
     for record in records:
         flatten_records.append(flatten_record(record))
-    return pd.DataFrame(flatten_records)
+
+    df = pd.DataFrame(flatten_records)
+    if drop_na_for is not None:
+        df = df.dropna(subset=drop_na_for)
+        # Also drop rows with empty lists or empty strings
+        df = df[
+            ~df[drop_na_for].apply(lambda x: any(v == "" or v == [] for v in x), axis=1)
+        ]
+    return df
 
 
-def get_user_pandas_df(user_id: int, time_period: int | None = None ) -> pd.DataFrame:
+def get_user_pandas_df(user_id: int, time_period: int | None = None) -> pd.DataFrame:
     """Get a pandas DataFrame with all the mood records for a given user_id.
     Don't forget to check it it's empty or not!"""
     if time_period is not None:
