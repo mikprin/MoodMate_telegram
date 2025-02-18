@@ -35,6 +35,7 @@ BUTTONS_TEXT_LANG = {
         "enter_custom_role": "Введите свою роль",
         "set_ai_model": "Установить модель генеративного ИИ",
         "doping_report": "Отчёт о допингах",
+        "show_notes": "Показать мои заметки (режим дневника)",
     },
     Language.ENG.value: {
         "go_back": "Go back! 🔙",
@@ -63,6 +64,7 @@ BUTTONS_TEXT_LANG = {
         "enter_custom_role": "Enter custom role",
         "set_ai_model": "Set AI model",
         "doping_report": "Doping report",
+        "show_notes": "Show my records notes (diary mode)",
     },
 }
 

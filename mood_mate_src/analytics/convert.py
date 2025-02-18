@@ -35,11 +35,19 @@ def convert_records_to_pandas(
     return df
 
 
-def get_user_pandas_df(user_id: int, time_period: int | None = None) -> pd.DataFrame:
+def get_user_pandas_df(user_id: int,
+                       time_period: int | None = None,
+                       filter_patrial_records: bool = True  # Drop records with empty value for mood.
+                       ) -> pd.DataFrame:
     """Get a pandas DataFrame with all the mood records for a given user_id.
     Don't forget to check it it's empty or not!"""
     if time_period is not None:
         records = get_user_records_for_past_time(user_id, time_period)
     else:
         records = get_mood_records_from_db(user_id)
-    return convert_records_to_pandas(records)
+
+    if filter_patrial_records:
+        drop_na_for = ["mood"]
+    else:
+        drop_na_for = None
+    return convert_records_to_pandas(records, drop_na_for=drop_na_for)

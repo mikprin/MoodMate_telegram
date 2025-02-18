@@ -2,7 +2,7 @@
 import os
 import re
 import tempfile
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from aiogram import Router, types
 from aiogram.fsm.context import FSMContext
@@ -41,8 +41,9 @@ async def track_mood_handler(message: Message, state: FSMContext):
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text=BUTTONS_TEXT_LANG[language]["get_csv"], callback_data="get_csv"
-                )
+                    text=BUTTONS_TEXT_LANG[language]["show_notes"],
+                    callback_data="show_notes",
+                ),
             ],
             [
                 InlineKeyboardButton(
@@ -73,6 +74,11 @@ async def track_mood_handler(message: Message, state: FSMContext):
                     text=BUTTONS_TEXT_LANG[language]["doping_report"],
                     callback_data="doping_report",
                 ),
+            ],
+            [
+                InlineKeyboardButton(
+                    text=BUTTONS_TEXT_LANG[language]["get_csv"], callback_data="get_csv"
+                )
             ],
         ]
     )
@@ -152,3 +158,27 @@ async def doping_report_handler(call: types.CallbackQuery):
         summary = get_dopings_monthly_summary(df, user)
         await call.answer()
         await call.message.answer(summary)
+
+
+@router.callback_query(CallbackDataFilter("show_notes"))
+async def show_notes_handler(call: types.CallbackQuery):
+    """Show only the notes from mood records"""
+    user = await process_user_from_id(call.from_user.id)
+    # logger.info(f"User {user.settings.username} requested notes")
+
+    records = get_mood_records_from_db(user.user_id)
+    df = convert_records_to_pandas(records)
+
+    # Filter only records with notes
+    notes_df = df[df['note'].notna() & (df['note'] != '')]
+
+    if notes_df.empty:
+        await call.answer()
+        await call.message.answer(get_state_msg("not_enough_records", user))
+    else:
+        notes_text = "\n\n".join([
+            f"📅 {datetime.fromtimestamp(row['created_at']).strftime('%Y-%m-%d %H:%M')}\n📝 {row['note']}"
+            for _, row in notes_df.iterrows()
+        ])
+        await call.answer()
+        await call.message.answer(notes_text[:4096])  # Telegram message length limit
