@@ -64,7 +64,7 @@ def get_default_suggestions() -> list[ActionSuggestion]:
 def get_user_suggestions_prompt_from_records(
     user: User,
     records: list[MoodRecord],
-    parsing: str = "html"
+    parsing: str | None = "html"
 ) -> str:
     """
     Get suggestions prompt based on user records
@@ -133,7 +133,7 @@ async def get_ai_reaction_to_record_async(user: User, record: MoodRecord) -> Opt
     provider = get_provider_for_model(model_name)
 
     # Generate the prompt and convert to messages format
-    prompt = get_user_suggestions_prompt_from_records(user, [record])
+    prompt = get_user_suggestions_prompt_from_records(user, [record], parsing=None)
     if not prompt:
         logger.error("Failed to generate suggestion prompt")
         return None

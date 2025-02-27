@@ -162,8 +162,8 @@ async def make_ai_request_async(request: Union[OpenAIRequest, ClaudeRequest], pr
             async with session.post(api_url, json=request.model_dump(), headers=headers) as response:
                 if response.status >= 400:
                     error_text = await response.text()
+                    logger.error(f"HTTP Error {response.status}: {error_text}")
                     return AIResponse(error=f"HTTP Error {response.status}: {error_text}")
-
                 response_json = await response.json()
                 return AIResponse(**response_json)
     except aiohttp.ClientError as e:

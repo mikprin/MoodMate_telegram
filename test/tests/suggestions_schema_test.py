@@ -108,3 +108,9 @@ def test_prompt_generation():
     prompt = get_user_suggestions_prompt_from_records(user = user, records = records)
     assert isinstance(prompt, str)
     assert len(prompt) > 0
+
+    prompt = get_user_suggestions_prompt_from_records(user = user, records = records, parsing="plain")
+    assert isinstance(prompt, str)
+    assert len(prompt) > 0
+    assert "html" not in prompt
+    assert "HTML" not in prompt
