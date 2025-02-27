@@ -11,3 +11,12 @@ test:
 
 up:
 	docker compose up -d --build
+
+
+.PHONY: down
+down:
+	docker compose stop && docker compose down
+
+.PHONY: backup
+backup:
+	./scripts/backup.sh

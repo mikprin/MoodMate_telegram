@@ -11,7 +11,8 @@ class AIModel(str, Enum):
     Because of two different APIs."""
     GPT4_MINI = "gpt-4o-mini"
     GPT4 = "gpt-4o"
-
+    CLAUDE_37 = "claude-3-7-sonnet-latest"
+    CLAUDE_35 = "claude-3-5-haiku-latest"
 class Language(Enum):
     ENG = "en"
     RU = "ru"

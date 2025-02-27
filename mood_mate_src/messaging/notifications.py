@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import pendulum
 
 from mood_mate_src.ai_agent.ai_requests import \
-    get_user_report_for_past_time_with_open_ai
+    get_user_report_for_past_time_with_ai_async
 from mood_mate_src.database_tools.mood_data import MoodData, MoodRecord
 from mood_mate_src.database_tools.schema import (Language, User,
                                                  default_reminder_time)
@@ -83,13 +83,13 @@ async def weekly_report():
     users = get_all_users_from_db()
     for user in users:
         if user.settings.weekly_report_enabled:
-            response = get_user_report_for_past_time_with_open_ai(delta=60*60*24*10, user=user)
+            response = await get_user_report_for_past_time_with_ai_async(delta=60*60*24*10, user=user)
             if response is not None:
-                if 'error' in response:
+                if response.error is not None:
                     logger.error(f"Error in weekly report for user {user.settings.username}: {response['error']}")
                     # await send_message_to_chat_id(user.chat_id, response['error'])
                 else:
-                    await send_message_to_chat_id(user.chat_id, response['response'])
+                    await send_message_to_chat_id(user.chat_id, response.response)
             else:
                 logger.info(f"No records for user {user.settings.username} in the last 10 days")
                 await send_message_to_chat_id(user.chat_id, get_state_msg("lack_of_records_for_report", user))

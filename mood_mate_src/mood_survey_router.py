@@ -7,7 +7,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from mood_mate_src.ai_agent.suggestions import get_ai_reaction_to_record
+from mood_mate_src.ai_agent.suggestions import get_ai_reaction_to_record_async
 from mood_mate_src.database_tools.mood_data import (MoodData, MoodRecord,
                                                     add_mood_record_to_db)
 from mood_mate_src.database_tools.redis_tools import (UserSession,
@@ -285,7 +285,7 @@ async def no_note_callback_handler(query: types.CallbackQuery, state: FSMContext
     if os.environ.get("DEBUG") == "True":
         await send_message_to_chat_id(user.chat_id, f"Your record:\n{record_text}")
     await query.answer()
-    ai_response = get_ai_reaction_to_record(user, session.mood_record)
+    ai_response = await get_ai_reaction_to_record_async(user, session.mood_record)
     if ai_response is not None:
         answer_message = ai_response
     else:
@@ -311,7 +311,7 @@ async def add_note_handler(message: Message, state: FSMContext):
     session.mood_record.data.note = message.text
     await process_end_of_session(user, session)
     await state.clear()
-    ai_response = get_ai_reaction_to_record(user, session.mood_record)
+    ai_response = await get_ai_reaction_to_record_async(user, session.mood_record)
     if ai_response is not None:
         answer_message = ai_response
     else:
