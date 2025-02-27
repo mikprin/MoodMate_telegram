@@ -1,6 +1,10 @@
+import asyncio
 import os
+from typing import Literal, Optional, Union
 
+import aiohttp
 import requests
+from pydantic import BaseModel, Field
 
 from mood_mate_src.analytics.assistants import DEFAULT_ASSISTANT_ROLE
 from mood_mate_src.database_tools.mood_data import (
@@ -20,14 +24,75 @@ note": f"Anything to add? Write a note if you want.
 """
 
 
+class Message(BaseModel):
+    """Single message in a conversation"""
+    role: str
+    content: str
+
+
+class ClaudeRequest(BaseModel):
+    """Claude API request model"""
+    model_name: str
+    messages: list[Message]
+    role_description: Optional[str] = None
+    max_tokens: int = 1000
+    temperature: float = 0.2
+
+
+class OpenAIRequest(BaseModel):
+    """OpenAI API request model"""
+    model_name: str
+    messages: list[Message]
+    max_tokens: int = 1000
+    temperature: float = 0.7
+
+
+class AIResponse(BaseModel):
+    """Response from AI models"""
+    response: str | None = None
+    error: str | None = None
+
+
+class ModelProvider(BaseModel):
+    """Model provider configuration"""
+    name: Literal["openai", "anthropic"]
+    model_prefix: str
+    api_endpoint: str
+
+
+MODEL_PROVIDERS = {
+    "openai": ModelProvider(
+        name="openai",
+        model_prefix="gpt",
+        api_endpoint="api/open_ai_request"
+    ),
+    "anthropic": ModelProvider(
+        name="anthropic",
+        model_prefix="claude",
+        api_endpoint="api/claude_request"
+    )
+}
+
+
+def get_provider_for_model(model_name: str) -> ModelProvider:
+    """Determine the provider based on model name prefix"""
+    for provider in MODEL_PROVIDERS.values():
+        if model_name.startswith(provider.model_prefix):
+            return provider
+    # Default to OpenAI if unknown
+    logger.warning(f"Unknown model prefix for {model_name}, defaulting to OpenAI")
+    return MODEL_PROVIDERS["openai"]
+
+
 def get_user_report_prompt_from_records(
     records: list, user: User, role: AssistantRole = DEFAULT_ASSISTANT_ROLE
-) -> str:
+) -> Optional[str]:
     """
     Get prompt for creating a report from records
     """
     if len(records) == 0:
         return None
+
     prompt = f"""User {user.settings.name} (username {user.settings.username}) has following mood data statistics for the last period of {len(records)} records:
     Total records: {len(records)}
     Records: {records}
@@ -36,17 +101,20 @@ def get_user_report_prompt_from_records(
 
     Tell user some supportive comment on how do you see the situation and what you can advise for this person?
     Try to add more energy if the user energy is low.
-    prompt += "Be not very critical of habits and behavior, but rather supportive and helpful.
-    Use a tone of {role.role_name}!"""
+    """
+    prompt += "Be not very critical of habits and behavior, but rather supportive and helpful. "
+    prompt += f"Use a tone of {role.role_name}!"
+
     # Pick a language
     if user.settings.language == "ru":
-        prompt += f"Answer in Russian language!"
+        prompt += " Answer in Russian language!"
+
     return prompt
 
 
-def get_user_report_for_past_time(
+def get_prompt_for_user_report(
     delta: int, user: User, role: AssistantRole = DEFAULT_ASSISTANT_ROLE
-) -> str:
+) -> Optional[str]:
     """
     Get prompt for creating a report for the last delta seconds
     """
@@ -55,107 +123,159 @@ def get_user_report_for_past_time(
     return prompt
 
 
-def make_open_ai_request_routed(messages: list[dict], model_name="gpt-4o-mini") -> dict:
+def make_ai_request(request: Union[OpenAIRequest, ClaudeRequest], provider: ModelProvider) -> AIResponse:
     """
-    Sends a request to the FastAPI OpenAI service. Via Router.
+    Send a request to the appropriate AI model API endpoint
 
-    :param api_url: The URL of the FastAPI service (e.g., http://localhost:8000/api/open_ai_request).
-    :param model_name: The name of the OpenAI model (e.g., "gpt-4").
-    :param messages: A list of message dictionaries with "role" and "content" (e.g., [{"role": "user", "content": "Hello"}]).
-    :param auth_token: The authorization token required for the API.
+    Args:
+        request: The model-specific request object
+        provider: The model provider configuration
 
-    :return: The response from the OpenAI service.
+    Returns:
+        AIResponse object with either response or error
     """
-
+    api_url = os.getenv("RELAY_API_URL", "http://localhost:8000") + provider.api_endpoint
     auth_token = os.getenv("OPENAI_RELAY_KEY", "")
-    api_url = os.getenv("RELAY_API_URL", "localhost:8000/api/open_ai_request")
 
     headers = {"Authorization": auth_token, "Content-Type": "application/json"}
 
-    payload = {"model_name": model_name, "messages": messages}
+    try:
+        response = requests.post(api_url, json=request.model_dump(), headers=headers)
+        response.raise_for_status()
+        return AIResponse(**response.json())
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Request to {api_url} failed: {e}")
+        return AIResponse(error=str(e))
+
+
+async def make_ai_request_async(request: Union[OpenAIRequest, ClaudeRequest], provider: ModelProvider) -> AIResponse:
+    """
+    Asynchronous version of make_ai_request
+    """
+    api_url = os.getenv("RELAY_API_URL", "http://localhost:8000") + provider.api_endpoint
+    auth_token = os.getenv("OPENAI_RELAY_KEY", "")
+
+    headers = {"Authorization": auth_token, "Content-Type": "application/json"}
 
     try:
-        response = requests.post(api_url, json=payload, headers=headers)
-        response.raise_for_status()  # Raise an exception for 4xx/5xx errors
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        return {"error": str(e)}
+        async with aiohttp.ClientSession() as session:
+            async with session.post(api_url, json=request.model_dump(), headers=headers) as response:
+                if response.status >= 400:
+                    error_text = await response.text()
+                    return AIResponse(error=f"HTTP Error {response.status}: {error_text}")
+
+                response_json = await response.json()
+                return AIResponse(**response_json)
+    except aiohttp.ClientError as e:
+        logger.error(f"Async request to {api_url} failed: {e}")
+        return AIResponse(error=str(e))
 
 
-# def make_open_ai_request(messages: list[dict], system_role = "You are a helpful assistant.") -> str:
-#     """
-#     Make a request to OpenAI API
-#     """
-#     client = OpenAI()
-
-#     if messages is None or len(messages) == 0:
-#         logger.error("make_open_ai_request: prompt is empty")
-#         return None
-
-#     try:
-#         completion = client.chat.completions.create(
-#             model="gpt-4o-mini",
-#             messages=messages
-#         )
-#         return completion.choices[0].message.content
-#     except Exception as e:
-#         logger.error(f"OpenAI request failed: {e}")
-#         return None
-
-
-def get_simple_messages_from_role(
-    prompt: str, role: AssistantRole, model_name: str | None = None
-) -> list[dict]:
+def get_messages_from_prompt(
+    prompt: str, role: AssistantRole, provider: ModelProvider
+) -> list[Message]:
     """Create a list of messages from the role and the prompt"""
-    if role.role_description is not None:
-        role_description = f"Your role is {role.role_name}. Description of your role: {role.role_description}"
-    else:
-        role_description = f"Your role is {role.role_name}."
+    role_description = f"Your role is {role.role_name}."
+    if role.role_description:
+        role_description += f" Description of your role: {role.role_description}"
 
-    messages = [
-        {"role": "system", "content": role_description},
-        {"role": "user", "content": prompt},
-    ]
-    return messages
+    if provider.name == "openai":
+        return [
+            Message(role="system", content=role_description),
+            Message(role="user", content=prompt),
+        ]
+    elif provider.name == "anthropic":
+        # Claude doesn't have a standard system role, so we include the role description in the user message
+        prompt = f"{role_description}\n{prompt}"
+        return [
+            Message(role="user", content=prompt),
+        ]
+
+    # Default case
+    return [Message(role="user", content=prompt)]
 
 
-def get_user_report_for_past_time_with_open_ai(
+# def get_user_report_for_past_time_with_ai(
+#     delta: int, user: User
+# ) -> Optional[AIResponse]:
+#     """
+#     Get a report for the user's mood data over the past time period
+#     """
+#     # Get the user's preferred assistant role and AI model
+#     role = user.get_assistant_role()
+#     model_name = user.settings.ai_model.value if user.settings.ai_model else "gpt-4o-mini"
+
+#     logger.info(f"Using model {model_name} for user {user.settings.username}")
+
+#     # Determine the model provider based on the model name
+#     provider = get_provider_for_model(model_name)
+
+#     # Get the prompt and messages
+#     prompt = get_prompt_for_user_report(delta, user, role=role)
+#     if not prompt:
+#         return AIResponse(error="No records found for the specified time period")
+
+#     messages = get_messages_from_prompt(prompt, role=role, provider=provider)
+
+#     # Create the appropriate request object based on the provider
+#     if provider.name == "openai":
+#         request = OpenAIRequest(model_name=model_name, messages=messages)
+#     else:  # anthropic
+#         request = ClaudeRequest(model_name=model_name, messages=messages)
+
+#     # Make the request
+#     response = make_ai_request(request, provider)
+
+#     # Add disclaimer to the response
+#     if response.response:
+#         disclaimer = get_disclaimer_for_user(user, role)
+#         response.response += f"\n\n{disclaimer}"
+
+#     return response
+
+
+async def get_user_report_for_past_time_with_ai_async(
     delta: int, user: User
-) -> dict[str, str] | None:
+) -> Optional[AIResponse]:
     """
-    Get prompt for creating a report for the last delta seconds
+    Asynchronous version of get_user_report_for_past_time_with_ai
     """
-
-    # Check if user has a custom role
+    # Get the user's preferred assistant role and AI model
     role = user.get_assistant_role()
+    model_name = user.settings.ai_model.value if user.settings.ai_model else "gpt-4o-mini"
 
-    # Change for implementing klaude
-    if user.settings.ai_model is not None:
-        model_name = user.settings.ai_model.value
-    else:
-        model_name = "gpt-4o-mini"
     logger.info(f"Using model {model_name} for user {user.settings.username}")
 
-    prompt = get_user_report_for_past_time(delta, user, role=role)
-    messages = get_simple_messages_from_role(prompt, role=role, model_name=model_name)
-    response = make_open_ai_request_routed(messages=messages, model_name=model_name)
+    # Determine the model provider based on the model name
+    provider = get_provider_for_model(model_name)
 
-    # Add response disclamer:
-    if "error" in response.keys():
-        logger.error(f"OpenAI request failed: {response['error']}")
-        return response
-    if "response" in response.keys():
-        # resp_text = response['response']
-        pass
-    else:
-        logger.error(f"OpenAI response does not contain 'response' key")
-        return None
-    if user.settings.language == "ru":
-        response[
-            "response"
-        ] += f"\n\nВаш скромный еженедельный отчет от {role.role_name} 📊. Не бери близко к сердцу, ведь я не настоящий, а вот ты да!"
-    else:
-        response[
-            "response"
-        ] += f"\n\nYour humble weekly report from {role.role_name} 📊. Don't take it to heart, because I'm not real, but you are!"
+    # Get the prompt and messages
+    prompt = get_prompt_for_user_report(delta, user, role=role)
+    if not prompt:
+        return AIResponse(error="No records found for the specified time period")
+
+    messages = get_messages_from_prompt(prompt, role=role, provider=provider)
+
+    # Create the appropriate request object based on the provider
+    if provider.name == "openai":
+        request = OpenAIRequest(model_name=model_name, messages=messages)
+    else:  # anthropic
+        request = ClaudeRequest(model_name=model_name, messages=messages)
+
+    # Make the request asynchronously
+    response = await make_ai_request_async(request, provider)
+
+    # Add disclaimer to the response
+    if response.response:
+        disclaimer = get_disclaimer_for_user(user, role)
+        response.response += f"\n\n{disclaimer}"
+
     return response
+
+
+def get_disclaimer_for_user(user: User, role: AssistantRole) -> str:
+    """Get localized disclaimer based on user language"""
+    if user.settings.language == "ru":
+        return f"Ваш скромный еженедельный отчет от {role.role_name} 📊. Не бери близко к сердцу, ведь я не настоящий, а вот ты да!"
+    else:
+        return f"Your humble weekly report from {role.role_name} 📊. Don't take it to heart, because I'm not real, but you are!"
