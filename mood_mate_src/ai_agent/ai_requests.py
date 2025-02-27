@@ -64,12 +64,12 @@ MODEL_PROVIDERS = {
     "openai": ModelProvider(
         name="openai",
         model_prefix="gpt",
-        api_endpoint="api/open_ai_request"
+        api_endpoint="/api/open_ai_request"
     ),
     "anthropic": ModelProvider(
         name="anthropic",
         model_prefix="claude",
-        api_endpoint="api/claude_request"
+        api_endpoint="/api/claude_request"
     )
 }
 
