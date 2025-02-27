@@ -1,12 +1,22 @@
 # settings and other routers
+from datetime import datetime, timedelta
+
 from aiogram import F, Router, types
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
+from mood_mate_src.ai_agent.ai_requests import AIResponse, ClaudeRequest
+from mood_mate_src.ai_agent.ai_requests import Message as AIMessage
+from mood_mate_src.ai_agent.ai_requests import (OpenAIRequest,
+                                                get_messages_from_prompt,
+                                                get_provider_for_model,
+                                                make_ai_request_async)
 from mood_mate_src.analytics.assistants import (PREDEFINED_ASSITANT_ROLES,
                                                 create_short_assistant_name)
 from mood_mate_src.analytics.user_analytics import get_user_statistics_text
+from mood_mate_src.database_tools.mood_data import \
+    get_user_records_for_past_time
 from mood_mate_src.database_tools.schema import (DEFAULT_ASSISTANT_ROLE,
                                                  AIModel, AssistantRole,
                                                  Language)
@@ -227,3 +237,86 @@ async def select_ai_model_callback_handler(query: types.CallbackQuery, state: FS
     await state.clear()
     await query.answer()
     await query.message.edit_text(get_state_msg("ai_model_set", user).format(selected_model.value))
+
+
+# Add this to the existing router in additional_routers.py
+@router.message(Command("ask"))
+async def ask_ai_handler(message: Message) -> None:
+    """
+    Handle the /ask command to query the AI about user's mood records
+    Format: /ask <question>
+    """
+    user = await process_user_db(message)
+
+    # Extract the question from the message (remove the /ask part)
+    command_text = message.text
+    question = command_text.replace("/ask", "", 1).strip()
+
+    if not question:
+        await message.answer("Please provide a question after /ask. For example: `/ask How to improve my mood?`")
+        return
+
+    # Let the user know we're processing
+    processing_message = await message.answer("Thinking about your question... This may take a moment.")
+
+    try:
+        # Get user records for the past 7 days
+        days_to_look_back = 7
+        seconds = timedelta(days=days_to_look_back).total_seconds()
+        records = get_user_records_for_past_time(user.user_id, seconds)
+
+        if not records:
+            await processing_message.edit_text(f"You don't have any mood records for the past {days_to_look_back} days. Please track some moods first!")
+            return
+
+        # Format records for the AI prompt
+        records_text = "\n".join([f"Record {i+1}: {record}" for i, record in enumerate(records)])
+
+        # Create a prompt for the AI
+        prompt = f"""The user {user.settings.name} has asked the following question about their mood data from the past {days_to_look_back} days:
+
+Question: "{question}"
+
+Here are their mood records for this period:
+{records_text}
+
+Please provide a thoughtful, personalized response to their question based on the data shown.
+Your answer should be supportive, helpful, and tailored to what the records suggest about their mood patterns.
+Don't just list the data back to them - interpret it and address their specific question.
+"""
+
+        # Get user's preferred AI model and role
+        role = user.get_assistant_role()
+        model_name = user.settings.ai_model.value if user.settings.ai_model else "gpt-4o-mini"
+
+        # Determine the model provider
+        provider = get_provider_for_model(model_name)
+
+        # Add language preference
+        if user.settings.language == "ru":
+            prompt += "\nPlease answer in Russian."
+
+        # Add role customization
+        prompt += f"\nUse the tone of a {role.role_name}."
+
+        # Convert to messages format for the AI request
+        messages = get_messages_from_prompt(prompt, role=role, provider=provider)
+
+        # Create the appropriate request object
+        if provider.name == "openai":
+            request = OpenAIRequest(model_name=model_name, messages=messages)
+        else:  # anthropic
+            request = ClaudeRequest(model_name=model_name, messages=messages)
+
+        # Make the async request
+        response = await make_ai_request_async(request, provider)
+
+        if response.response:
+            await processing_message.edit_text(response.response)
+        else:
+            logger.error(f"AI request failed: {response.error}")
+            await processing_message.edit_text("I couldn't process your question at this time. Please try again later.")
+
+    except Exception as e:
+        logger.error(f"Error in ask_ai_handler: {e}")
+        await processing_message.edit_text("Something went wrong while processing your question. Please try again later.")
