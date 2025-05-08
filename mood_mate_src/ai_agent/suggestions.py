@@ -92,6 +92,11 @@ def get_user_suggestions_prompt_from_records(
     role = user.get_assistant_role()
     last_record = records[-1]
 
+    if len(records) > 1:
+        records_exept_last = records[:-1]
+    else:
+        records_exept_last = None
+
     record_time = datetime.now().strftime("%H:%M")
 
     prompt = f"""We just got a record from {user.settings.name}.
@@ -104,6 +109,12 @@ Mention for user one of the following actions:
 You can suggest them for today or tomorrow. Depending on the time record was created and suggested action.
 But if you feel like you have your own idea. Improvise if user note is present."""
 
+    if records_exept_last is not None:
+        prompt += f"\nHere are the previous records for a week. Just for more context:\n"
+        for record in records_exept_last:
+            record_time = convert_timestamp_to_time(record.created_at)
+            prompt += f"Record created at {record_time}:\n{record.data}\n"
+
     if parsing == "html":
         prompt += f"\nUse HTML formatting if needed."
     if user.settings.language == "ru":
@@ -115,7 +126,7 @@ But if you feel like you have your own idea. Improvise if user note is present."
     return prompt
 
 
-async def get_ai_reaction_to_record_async(user: User, record: MoodRecord) -> Optional[str]:
+async def get_ai_reaction_to_records_async(user: User, records: list[MoodRecord]) -> Optional[str]:
     """
     Asynchronous version of get_ai_reaction_to_record
 
@@ -133,7 +144,7 @@ async def get_ai_reaction_to_record_async(user: User, record: MoodRecord) -> Opt
     provider = get_provider_for_model(model_name)
 
     # Generate the prompt and convert to messages format
-    prompt = get_user_suggestions_prompt_from_records(user, [record], parsing=None)
+    prompt = get_user_suggestions_prompt_from_records(user, records, parsing=None)
     if not prompt:
         logger.error("Failed to generate suggestion prompt")
         return None
